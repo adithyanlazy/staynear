@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const db = require('../data/mockDb');
+const User = require('../models/User');
 
 exports.protect = async (req, res, next) => {
   let token;
@@ -15,8 +15,8 @@ exports.protect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'staynear_mock_secret');
-    const user = db.findById('users', decoded.id);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'staynear_jwt_secret_key_2024');
+    const user = await User.findById(decoded.id);
     if (!user) {
       return res.status(401).json({ success: false, message: 'User not found' });
     }

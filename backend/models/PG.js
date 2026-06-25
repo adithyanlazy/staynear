@@ -41,20 +41,10 @@ const PGSchema = new mongoose.Schema({
   },
   area: {
     type: String,
-    required: [true, 'Please add area'],
-    enum: [
-      'Surathkal', 'Mangalore City', 'Bejai', 'Kankanady', 'Hampankatta',
-      'Kadri', 'Falnir', 'Boloor', 'Kapikad', 'Nanthoor',
-      'Valacchil', 'Moodbidri', 'Karkala', 'Udupi'
-    ]
+    required: [true, 'Please add area']
   },
   collegeNearby: [{
-    type: String,
-    enum: [
-      'NITK Surathkal', 'St Aloysius College', 'Yenepoya University',
-      'Srinivas University', 'Canara Engineering College', 'AJ Institute',
-      'Mangalore University', 'SDM College', 'KMC Mangalore'
-    ]
+    type: String
   }],
   address: {
     type: String,
@@ -71,15 +61,11 @@ const PGSchema = new mongoose.Schema({
   images: [{
     type: String
   }],
+  videos: [{
+    type: String
+  }],
   amenities: [{
-    type: String,
-    enum: [
-      'WiFi', 'Laundry', 'Parking', 'CCTV', 'Power Backup',
-      'Hot Water', 'RO Water', 'Housekeeping', 'Common Kitchen',
-      'TV Room', 'Study Room', 'Gym', 'Garden', 'Security Guard',
-      'Furnished', 'Attached Bathroom', 'Geysers', 'Microwave',
-      'Refrigerator', 'Washing Machine'
-    ]
+    type: String
   }],
   contactNumber: {
     type: String,

@@ -1,14 +1,14 @@
-const db = require('../data/mockDb');
+const PG = require('../models/PG');
+const Review = require('../models/Review');
 
 exports.getPGs = async (req, res, next) => {
   try {
-    const filter = {};
-    const options = {};
+    const filter = { active: true };
 
     if (req.query.area) filter.area = req.query.area;
     if (req.query.gender) filter.gender = req.query.gender;
-    if (req.query.foodIncluded) filter.foodIncluded = req.query.foodIncluded;
-    if (req.query.acAvailable) filter.acAvailable = req.query.acAvailable;
+    if (req.query.foodIncluded !== undefined) filter.foodIncluded = req.query.foodIncluded === 'true';
+    if (req.query.acAvailable !== undefined) filter.acAvailable = req.query.acAvailable === 'true';
     if (req.query.sharingType) filter.sharingType = req.query.sharingType;
     if (req.query.collegeNearby) filter.collegeNearby = req.query.collegeNearby;
 
@@ -18,24 +18,28 @@ exports.getPGs = async (req, res, next) => {
       if (req.query.maxRent) filter.rent.$lte = parseInt(req.query.maxRent);
     }
 
+    const sort = req.query.sort || '-createdAt';
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 12;
+    const skip = (page - 1) * limit;
+
+    let query;
     if (req.query.search) {
-      filter.$text = { $search: req.query.search };
+      query = PG.find({ ...filter, $text: { $search: req.query.search } });
+    } else {
+      query = PG.find(filter);
     }
 
-    options.sort = req.query.sort || '-createdAt';
-    options.page = parseInt(req.query.page, 10) || 1;
-    options.limit = parseInt(req.query.limit, 10) || 12;
-    options.skip = (options.page - 1) * options.limit;
-
-    const { data, total } = db.findAll('pgs', filter, options);
+    const total = await PG.countDocuments(filter);
+    const data = await query.sort(sort).skip(skip).limit(limit);
 
     const pagination = {};
-    const endIndex = options.page * options.limit;
+    const endIndex = page * limit;
     if (endIndex < total) {
-      pagination.next = { page: options.page + 1, limit: options.limit };
+      pagination.next = { page: page + 1, limit };
     }
-    if (options.skip > 0) {
-      pagination.prev = { page: options.page - 1, limit: options.limit };
+    if (skip > 0) {
+      pagination.prev = { page: page - 1, limit };
     }
 
     res.status(200).json({
@@ -52,7 +56,7 @@ exports.getPGs = async (req, res, next) => {
 
 exports.getPG = async (req, res, next) => {
   try {
-    const pg = db.findById('pgs', req.params.id);
+    const pg = await PG.findById(req.params.id);
     if (!pg) {
       return res.status(404).json({ success: false, message: 'PG not found' });
     }
@@ -64,7 +68,7 @@ exports.getPG = async (req, res, next) => {
 
 exports.createPG = async (req, res, next) => {
   try {
-    const pg = db.create('pgs', req.body);
+    const pg = await PG.create(req.body);
     res.status(201).json({ success: true, data: pg });
   } catch (err) {
     next(err);
@@ -73,7 +77,7 @@ exports.createPG = async (req, res, next) => {
 
 exports.updatePG = async (req, res, next) => {
   try {
-    const pg = db.update('pgs', req.params.id, req.body);
+    const pg = await PG.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!pg) {
       return res.status(404).json({ success: false, message: 'PG not found' });
     }
@@ -85,12 +89,12 @@ exports.updatePG = async (req, res, next) => {
 
 exports.deletePG = async (req, res, next) => {
   try {
-    const pg = db.findById('pgs', req.params.id);
+    const pg = await PG.findById(req.params.id);
     if (!pg) {
       return res.status(404).json({ success: false, message: 'PG not found' });
     }
-    db.delete('pgs', req.params.id);
-    db.findAll('reviews', { pgId: req.params.id }).data.forEach(r => db.delete('reviews', r._id));
+    await PG.findByIdAndDelete(req.params.id);
+    await Review.deleteMany({ pg: req.params.id });
     res.status(200).json({ success: true, data: {} });
   } catch (err) {
     next(err);
@@ -99,7 +103,7 @@ exports.deletePG = async (req, res, next) => {
 
 exports.getFeaturedPGs = async (req, res, next) => {
   try {
-    const { data } = db.findAll('pgs', { featured: true, active: true }, { limit: 6 });
+    const data = await PG.find({ featured: true, active: true }).limit(6);
     res.status(200).json({ success: true, count: data.length, data });
   } catch (err) {
     next(err);
@@ -108,7 +112,7 @@ exports.getFeaturedPGs = async (req, res, next) => {
 
 exports.getPGsByCollege = async (req, res, next) => {
   try {
-    const { data } = db.findAll('pgs', { collegeNearby: req.params.college, active: true });
+    const data = await PG.find({ collegeNearby: req.params.college, active: true });
     res.status(200).json({ success: true, count: data.length, data });
   } catch (err) {
     next(err);
@@ -117,18 +121,17 @@ exports.getPGsByCollege = async (req, res, next) => {
 
 exports.getSimilarPGs = async (req, res, next) => {
   try {
-    const pg = db.findById('pgs', req.params.id);
+    const pg = await PG.findById(req.params.id);
     if (!pg) {
       return res.status(404).json({ success: false, message: 'PG not found' });
     }
 
-    const { data } = db.findAll('pgs', {
+    const similar = await PG.find({
       area: pg.area,
       gender: pg.gender,
-      active: true
-    }, { limit: 4 });
-
-    const similar = data.filter(p => p._id !== pg._id).slice(0, 4);
+      active: true,
+      _id: { $ne: pg._id }
+    }).limit(4);
 
     res.status(200).json({ success: true, data: similar });
   } catch (err) {
@@ -138,9 +141,9 @@ exports.getSimilarPGs = async (req, res, next) => {
 
 exports.getStats = async (req, res, next) => {
   try {
-    const { total: totalPGs } = db.findAll('pgs', { active: true });
-    const totalAreas = db.distinct('pgs', 'area');
-    const avgResult = db.aggregate('pgs', [
+    const totalPGs = await PG.countDocuments({ active: true });
+    const areas = await PG.distinct('area', { active: true });
+    const avgResult = await PG.aggregate([
       { $match: { active: true } },
       { $group: { _id: null, avgRent: { $avg: '$rent' } } }
     ]);
@@ -149,7 +152,7 @@ exports.getStats = async (req, res, next) => {
       success: true,
       data: {
         totalPGs,
-        totalAreas: totalAreas.length,
+        totalAreas: areas.length,
         avgRent: avgResult.length > 0 ? Math.round(avgResult[0].avgRent) : 0
       }
     });

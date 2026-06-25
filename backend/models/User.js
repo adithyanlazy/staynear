@@ -11,9 +11,14 @@ const UserSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, 'Please add an email'],
     unique: true,
+    sparse: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please add a valid email']
+  },
+  phone: {
+    type: String,
+    unique: true,
+    sparse: true
   },
   password: {
     type: String,
@@ -27,9 +32,37 @@ const UserSchema = new mongoose.Schema({
     default: 'user'
   },
   favorites: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'PG'
+    pgId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'PG'
+    },
+    favoritedAt: {
+      type: Date,
+      default: Date.now
+    }
   }],
+  emailVerified: {
+    type: Boolean,
+    default: false
+  },
+  phoneVerified: {
+    type: Boolean,
+    default: false
+  },
+  verificationOTP: String,
+  verificationOTPExpiry: Date,
+  phoneOTP: String,
+  phoneOTPExpiry: Date,
+  verifiedDevices: [String],
+  lastLogin: Date,
+  loginCount: {
+    type: Number,
+    default: 0
+  },
+  active: {
+    type: Boolean,
+    default: true
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -38,7 +71,7 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
-    next();
+    return next();
   }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
@@ -46,7 +79,7 @@ UserSchema.pre('save', async function (next) {
 
 UserSchema.methods.getSignedJwtToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE
+    expiresIn: '7d'
   });
 };
 

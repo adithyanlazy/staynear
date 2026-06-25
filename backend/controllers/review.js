@@ -1,25 +1,20 @@
-const db = require('../data/mockDb');
+const Review = require('../models/Review');
+const PG = require('../models/PG');
+const User = require('../models/User');
 
 exports.getReviews = async (req, res, next) => {
   try {
     let filter = {};
     if (req.params.pgId) {
-      filter = { pgId: req.params.pgId };
+      filter = { pg: req.params.pgId };
     }
 
-    const { data } = db.findAll('reviews', filter, { sort: '-createdAt' });
+    const data = await Review.find(filter)
+      .sort('-createdAt')
+      .populate('user', 'name')
+      .populate('pg', 'name');
 
-    const reviewsWithUser = data.map(review => {
-      const user = db.findById('users', review.userId);
-      const pg = db.findById('pgs', review.pgId);
-      return {
-        ...review,
-        user: user ? { _id: user._id, name: user.name } : null,
-        pg: pg ? { _id: pg._id, name: pg.name } : null
-      };
-    });
-
-    res.status(200).json({ success: true, count: reviewsWithUser.length, data: reviewsWithUser });
+    res.status(200).json({ success: true, count: data.length, data });
   } catch (err) {
     next(err);
   }
@@ -27,22 +22,15 @@ exports.getReviews = async (req, res, next) => {
 
 exports.getReview = async (req, res, next) => {
   try {
-    const review = db.findById('reviews', req.params.id);
+    const review = await Review.findById(req.params.id)
+      .populate('user', 'name')
+      .populate('pg', 'name');
+
     if (!review) {
       return res.status(404).json({ success: false, message: 'Review not found' });
     }
 
-    const user = db.findById('users', review.userId);
-    const pg = db.findById('pgs', review.pgId);
-
-    res.status(200).json({
-      success: true,
-      data: {
-        ...review,
-        user: user ? { _id: user._id, name: user.name } : null,
-        pg: pg ? { _id: pg._id, name: pg.name } : null
-      }
-    });
+    res.status(200).json({ success: true, data: review });
   } catch (err) {
     next(err);
   }
@@ -51,25 +39,23 @@ exports.getReview = async (req, res, next) => {
 exports.addReview = async (req, res, next) => {
   try {
     const pgId = req.params.pgId;
-    const pg = db.findById('pgs', pgId);
+    const pg = await PG.findById(pgId);
 
     if (!pg) {
       return res.status(404).json({ success: false, message: 'PG not found' });
     }
 
-    const existingReview = db.findAll('reviews', { userId: req.user._id, pgId }).data;
-    if (existingReview.length > 0) {
+    const existingReview = await Review.findOne({ user: req.user._id, pg: pgId });
+    if (existingReview) {
       return res.status(400).json({ success: false, message: 'You have already reviewed this PG' });
     }
 
-    const review = db.create('reviews', {
-      userId: req.user._id,
-      pgId,
+    const review = await Review.create({
+      user: req.user._id,
+      pg: pgId,
       rating: req.body.rating,
       comment: req.body.comment
     });
-
-    updatePGRating(pgId);
 
     res.status(201).json({ success: true, data: review });
   } catch (err) {
@@ -79,22 +65,20 @@ exports.addReview = async (req, res, next) => {
 
 exports.updateReview = async (req, res, next) => {
   try {
-    let review = db.findById('reviews', req.params.id);
+    let review = await Review.findById(req.params.id);
 
     if (!review) {
       return res.status(404).json({ success: false, message: 'Review not found' });
     }
 
-    if (review.userId !== req.user._id && req.user.role !== 'admin') {
+    if (review.user.toString() !== req.user._id && req.user.role !== 'admin') {
       return res.status(403).json({ success: false, message: 'Not authorized to update this review' });
     }
 
-    review = db.update('reviews', req.params.id, {
+    review = await Review.findByIdAndUpdate(req.params.id, {
       rating: req.body.rating || review.rating,
       comment: req.body.comment || review.comment
-    });
-
-    updatePGRating(review.pgId);
+    }, { new: true });
 
     res.status(200).json({ success: true, data: review });
   } catch (err) {
@@ -104,37 +88,23 @@ exports.updateReview = async (req, res, next) => {
 
 exports.deleteReview = async (req, res, next) => {
   try {
-    const review = db.findById('reviews', req.params.id);
+    const review = await Review.findById(req.params.id);
 
     if (!review) {
       return res.status(404).json({ success: false, message: 'Review not found' });
     }
 
-    if (review.userId !== req.user._id && req.user.role !== 'admin') {
+    if (review.user.toString() !== req.user._id && req.user.role !== 'admin') {
       return res.status(403).json({ success: false, message: 'Not authorized to delete this review' });
     }
 
-    const pgId = review.pgId;
-    db.delete('reviews', req.params.id);
-    
-    updatePGRating(pgId);
+    const pgId = review.pg;
+    await Review.findByIdAndDelete(req.params.id);
+
+    await Review.getAverageRating(pgId);
 
     res.status(200).json({ success: true, data: {} });
   } catch (err) {
     next(err);
   }
 };
-
-function updatePGRating(pgId) {
-  const reviews = db.findAll('reviews', { pgId }).data;
-  
-  if (reviews.length > 0) {
-    const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
-    db.update('pgs', pgId, {
-      rating: Math.round(avgRating * 10) / 10,
-      numReviews: reviews.length
-    });
-  } else {
-    db.update('pgs', pgId, { rating: 0, numReviews: 0 });
-  }
-}

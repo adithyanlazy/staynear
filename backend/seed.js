@@ -8,7 +8,7 @@ dotenv.config();
 const samplePGs = [
   {
     name: 'Sunshine Boys Hostel',
-    description: 'Premium boys PG accommodation near NITK Surathkal with modern amenities and homely food. Well-furnished rooms with attached bathrooms and 24/7 security.',
+    description: 'Premium boys PG accommodation near NITK Surathkal with modern amenities and homely food.',
     rent: 8000,
     deposit: 10000,
     gender: 'boys',
@@ -28,7 +28,7 @@ const samplePGs = [
   },
   {
     name: 'Green Valley Ladies Hostel',
-    description: 'Safe and comfortable ladies PG near St Aloysius College. Homely environment with nutritious food and strict security measures.',
+    description: 'Safe and comfortable ladies PG near St Aloysius College.',
     rent: 7500,
     deposit: 8000,
     gender: 'girls',
@@ -48,7 +48,7 @@ const samplePGs = [
   },
   {
     name: 'City Center PG',
-    description: 'Affordable PG accommodation in the heart of Mangalore city. Close to markets, hospitals, and public transport.',
+    description: 'Affordable PG accommodation in the heart of Mangalore city.',
     rent: 6000,
     deposit: 7000,
     gender: 'co-ed',
@@ -67,7 +67,7 @@ const samplePGs = [
   },
   {
     name: 'AK Residency',
-    description: 'Modern PG near AJ Institute with AC rooms and premium facilities. Perfect for medical students.',
+    description: 'Modern PG near AJ Institute with AC rooms and premium facilities.',
     rent: 10000,
     deposit: 15000,
     gender: 'boys',
@@ -87,7 +87,7 @@ const samplePGs = [
   },
   {
     name: 'Lakshmi Ladies PG',
-    description: 'Home-like stay for girls near Srinivas University. Vegetarian food and peaceful environment.',
+    description: 'Home-like stay for girls near Srinivas University.',
     rent: 6500,
     deposit: 8000,
     gender: 'girls',
@@ -106,7 +106,7 @@ const samplePGs = [
   },
   {
     name: 'Nearby Boys Hostel',
-    description: 'Budget-friendly boys PG with all basic amenities. Walking distance to NITK.',
+    description: 'Budget-friendly boys PG with all basic amenities.',
     rent: 5500,
     deposit: 6000,
     gender: 'boys',
@@ -125,7 +125,7 @@ const samplePGs = [
   },
   {
     name: 'Cozy Corners PG',
-    description: 'Well-maintained PG with modern interiors. Close to Yenepoya University campus.',
+    description: 'Well-maintained PG with modern interiors.',
     rent: 7000,
     deposit: 9000,
     gender: 'co-ed',
@@ -145,7 +145,7 @@ const samplePGs = [
   },
   {
     name: 'Mangalore Homes',
-    description: 'Premium co-ed PG with homely atmosphere. Nutritious food and 24/7 water supply.',
+    description: 'Premium co-ed PG with homely atmosphere.',
     rent: 8500,
     deposit: 12000,
     gender: 'co-ed',
@@ -160,11 +160,12 @@ const samplePGs = [
     images: ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800'],
     amenities: ['WiFi', 'Laundry', 'CCTV', 'Hot Water', 'RO Water', 'Housekeeping', 'Furnished', 'Attached Bathroom', 'Washing Machine'],
     contactNumber: '+91 9876543217',
-    contactName: 'Anita D\'Souza'
+    contactName: "Anita D'Souza",
+    featured: true
   },
   {
     name: 'Students Inn',
-    description: 'Affordable hostel for engineering students. Close to Canara Engineering College.',
+    description: 'Affordable hostel for engineering students.',
     rent: 5000,
     deposit: 5000,
     gender: 'boys',
@@ -183,7 +184,7 @@ const samplePGs = [
   },
   {
     name: 'Rose Garden Ladies PG',
-    description: 'Beautiful garden PG for girls. Peaceful environment with home-cooked meals.',
+    description: 'Beautiful garden PG for girls.',
     rent: 7000,
     deposit: 8000,
     gender: 'girls',
@@ -216,7 +217,8 @@ const seedDB = async () => {
       name: 'Admin',
       email: 'admin@staynear.com',
       password: 'admin123',
-      role: 'admin'
+      role: 'admin',
+      emailVerified: true
     });
     console.log('Admin user created');
 
