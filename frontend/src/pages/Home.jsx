@@ -89,8 +89,9 @@ const Home = () => {
           <SearchBar />
 
           <div className="flex justify-center mt-6">
-            <Link to="/pgs" className="btn-secondary flex items-center gap-2">
-              View All PGs
+            <Link to="/pgs" className="inline-flex items-center gap-2 px-6 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg text-gray-900 dark:text-white font-semibold rounded-full border border-gray-200 dark:border-gray-600 hover:bg-white dark:hover:bg-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-300">
+              Browse All PGs
+              <span className="text-primary-500">→</span>
             </Link>
           </div>
 
