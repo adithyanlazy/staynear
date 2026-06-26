@@ -191,7 +191,7 @@ exports.updateSettings = async (req, res, next) => {
     if (!settings) {
       settings = await Settings.create(req.body);
     } else {
-      const { areas, colleges, popularAreas, siteName, siteDescription, contactEmail, contactPhone, maintenanceMode, allowRegistrations, maxImagesPerPG, happyStudents, avgRating } = req.body;
+      const { areas, colleges, popularAreas, siteName, siteDescription, contactEmail, contactPhone, maintenanceMode, allowRegistrations, maxImagesPerPG, happyStudents, avgRating, testimonials } = req.body;
       if (areas !== undefined) settings.areas = areas;
       if (colleges !== undefined) settings.colleges = colleges;
       if (popularAreas !== undefined) settings.popularAreas = popularAreas;
@@ -204,6 +204,7 @@ exports.updateSettings = async (req, res, next) => {
       if (maxImagesPerPG !== undefined) settings.maxImagesPerPG = maxImagesPerPG;
       if (happyStudents !== undefined) settings.happyStudents = happyStudents;
       if (avgRating !== undefined) settings.avgRating = avgRating;
+      if (testimonials !== undefined) settings.testimonials = testimonials;
       await settings.save();
     }
     res.status(200).json({ success: true, data: settings });

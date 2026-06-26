@@ -82,6 +82,18 @@ app.get('/api/suggestions', async (req, res) => {
   }
 });
 
+app.get('/api/testimonials', async (req, res) => {
+  try {
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = await Settings.create({});
+    }
+    res.status(200).json({ success: true, data: settings.testimonials || [] });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5001;

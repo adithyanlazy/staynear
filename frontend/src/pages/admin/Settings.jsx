@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Globe, Mail, Phone, Image, ToggleLeft, ToggleRight, MapPin, GraduationCap, Plus, X, LayoutGrid } from 'lucide-react';
+import { Save, Globe, Mail, Phone, Image, ToggleLeft, ToggleRight, MapPin, GraduationCap, Plus, X, LayoutGrid, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../utils/api';
 
@@ -70,6 +70,7 @@ const Settings = () => {
     popularAreas: [],
     happyStudents: '2000+',
     avgRating: '4.5',
+    testimonials: [],
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -77,6 +78,7 @@ const Settings = () => {
   const [newCollege, setNewCollege] = useState('');
   const [newPopularArea, setNewPopularArea] = useState('');
   const [newPopularAreaImage, setNewPopularAreaImage] = useState('');
+  const [newTestimonial, setNewTestimonial] = useState({ name: '', college: '', rating: 5, comment: '', avatar: '' });
 
   useEffect(() => { fetchSettings(); }, []);
 
@@ -89,6 +91,7 @@ const Settings = () => {
         areas: data.areas || [],
         colleges: data.colleges || [],
         popularAreas: data.popularAreas || [],
+        testimonials: data.testimonials || [],
       });
     } catch (err) {
       toast.error('Failed to load settings');
@@ -113,6 +116,7 @@ const Settings = () => {
         popularAreas: settings.popularAreas || [],
         happyStudents: settings.happyStudents || '2000+',
         avgRating: settings.avgRating || '4.5',
+        testimonials: settings.testimonials || [],
       };
       await api.put('/admin/settings', payload);
       toast.success('Settings saved successfully');
@@ -199,6 +203,33 @@ const Settings = () => {
       toast.success('Image uploaded');
     };
     reader.readAsDataURL(file);
+  };
+
+  const addTestimonial = () => {
+    const { name, college, rating, comment, avatar } = newTestimonial;
+    if (!name.trim() || !comment.trim()) {
+      toast.error('Name and comment are required');
+      return;
+    }
+    setSettings(prev => ({
+      ...prev,
+      testimonials: [...(prev.testimonials || []), { name: name.trim(), college: college.trim(), rating, comment: comment.trim(), avatar: avatar.trim() }]
+    }));
+    setNewTestimonial({ name: '', college: '', rating: 5, comment: '', avatar: '' });
+  };
+
+  const removeTestimonial = (index) => {
+    setSettings(prev => ({
+      ...prev,
+      testimonials: (prev.testimonials || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateTestimonial = (index, field, value) => {
+    setSettings(prev => ({
+      ...prev,
+      testimonials: (prev.testimonials || []).map((t, i) => i === index ? { ...t, [field]: value } : t)
+    }));
   };
 
   if (loading) {
@@ -432,6 +463,113 @@ const Settings = () => {
             ))}
             {(settings.popularAreas || []).length === 0 && (
               <p className="text-sm text-gray-400 dark:text-gray-500">No popular areas added yet</p>
+            )}
+          </div>
+        </div>
+
+        <div className="card p-6 lg:col-span-2">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <Star className="w-5 h-5 text-yellow-500" />
+            What Students Say (Homepage)
+            <span className="ml-auto text-sm font-normal text-gray-500">{(settings.testimonials || []).length} testimonials</span>
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            <input
+              type="text"
+              value={newTestimonial.name}
+              onChange={(e) => setNewTestimonial(prev => ({ ...prev, name: e.target.value }))}
+              placeholder="Student name *"
+              className="input-field text-sm"
+            />
+            <input
+              type="text"
+              value={newTestimonial.college}
+              onChange={(e) => setNewTestimonial(prev => ({ ...prev, college: e.target.value }))}
+              placeholder="College"
+              className="input-field text-sm"
+            />
+            <input
+              type="text"
+              value={newTestimonial.comment}
+              onChange={(e) => setNewTestimonial(prev => ({ ...prev, comment: e.target.value }))}
+              placeholder="Comment *"
+              className="input-field text-sm sm:col-span-2"
+            />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newTestimonial.avatar}
+                onChange={(e) => setNewTestimonial(prev => ({ ...prev, avatar: e.target.value }))}
+                placeholder="Avatar URL"
+                className="input-field text-sm flex-1"
+              />
+              <select
+                value={newTestimonial.rating}
+                onChange={(e) => setNewTestimonial(prev => ({ ...prev, rating: parseInt(e.target.value) }))}
+                className="input-field text-sm w-20"
+              >
+                {[5, 4, 3, 2, 1].map(r => (
+                  <option key={r} value={r}>{r} ★</option>
+                ))}
+              </select>
+            </div>
+            <button onClick={addTestimonial} className="btn-primary px-4 flex items-center gap-1 sm:col-span-2 justify-center">
+              <Plus className="w-4 h-4" />
+              Add Testimonial
+            </button>
+          </div>
+          <div className="space-y-3">
+            {(settings.testimonials || []).map((t, index) => (
+              <div key={index} className="flex flex-col sm:flex-row items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                <div className="flex-1 min-w-0 space-y-1 w-full">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={t.name}
+                      onChange={(e) => updateTestimonial(index, 'name', e.target.value)}
+                      className="input-field text-sm font-medium flex-1"
+                      placeholder="Name"
+                    />
+                    <input
+                      type="text"
+                      value={t.college}
+                      onChange={(e) => updateTestimonial(index, 'college', e.target.value)}
+                      className="input-field text-sm flex-1"
+                      placeholder="College"
+                    />
+                    <select
+                      value={t.rating}
+                      onChange={(e) => updateTestimonial(index, 'rating', parseInt(e.target.value))}
+                      className="input-field text-sm w-20"
+                    >
+                      {[5, 4, 3, 2, 1].map(r => (
+                        <option key={r} value={r}>{r} ★</option>
+                      ))}
+                    </select>
+                  </div>
+                  <input
+                    type="text"
+                    value={t.comment}
+                    onChange={(e) => updateTestimonial(index, 'comment', e.target.value)}
+                    className="input-field text-sm"
+                    placeholder="Comment"
+                  />
+                  <input
+                    type="text"
+                    value={t.avatar}
+                    onChange={(e) => updateTestimonial(index, 'avatar', e.target.value)}
+                    className="input-field text-sm"
+                    placeholder="Avatar URL"
+                  />
+                </div>
+                <button onClick={() => removeTestimonial(index)} className="flex items-center gap-1 px-3 py-1.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0">
+                  <X className="w-4 h-4" />
+                  Delete
+                </button>
+              </div>
+            ))}
+            {(settings.testimonials || []).length === 0 && (
+              <p className="text-sm text-gray-400 dark:text-gray-500">No testimonials added yet</p>
             )}
           </div>
         </div>

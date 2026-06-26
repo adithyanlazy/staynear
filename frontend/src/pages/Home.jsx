@@ -11,6 +11,7 @@ const Home = () => {
   const [featuredPGs, setFeaturedPGs] = useState([]);
   const [stats, setStats] = useState(null);
   const [popularAreas, setPopularAreas] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [heroRef, heroVisible] = useScrollAnimation();
@@ -21,14 +22,16 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [pgsRes, statsRes, areasRes] = await Promise.all([
+        const [pgsRes, statsRes, areasRes, testimonialsRes] = await Promise.all([
           api.get('/pgs/featured'),
           api.get('/pgs/stats'),
           api.get('/pgs/popular-areas'),
+          api.get('/testimonials'),
         ]);
         setFeaturedPGs(pgsRes.data.data);
         setStats(statsRes.data.data);
         setPopularAreas(areasRes.data.data);
+        setTestimonials(testimonialsRes.data.data || []);
       } catch (err) {
         console.error('Error fetching data:', err);
       } finally {
@@ -41,30 +44,6 @@ const Home = () => {
   const colleges = [
     'NITK Surathkal', 'St Aloysius College', 'Yenepoya University',
     'Srinivas University', 'Canara Engineering College', 'AJ Institute'
-  ];
-
-  const testimonials = [
-    {
-      name: 'Priya Sharma',
-      college: 'NITK Surathkal',
-      rating: 5,
-      comment: 'Found my perfect PG through StayNear! The filters made it so easy to find exactly what I needed.',
-      avatar: 'https://i.pravatar.cc/100?img=1'
-    },
-    {
-      name: 'Arjun Reddy',
-      college: 'St Aloysius College',
-      rating: 5,
-      comment: 'Best platform for students looking for PGs in Mangalore. Very user-friendly!',
-      avatar: 'https://i.pravatar.cc/100?img=3'
-    },
-    {
-      name: 'Sneha Patel',
-      college: 'Yenepoya University',
-      rating: 4,
-      comment: 'Saved me so much time. I could compare prices and amenities easily.',
-      avatar: 'https://i.pravatar.cc/100?img=5'
-    },
   ];
 
   return (
