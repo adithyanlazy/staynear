@@ -3,6 +3,59 @@ import { Save, Globe, Mail, Phone, Image, ToggleLeft, ToggleRight, MapPin, Gradu
 import toast from 'react-hot-toast';
 import api from '../../utils/api';
 
+const ToggleSwitch = ({ enabled, onChange, label, description }) => (
+  <div className="flex items-center justify-between py-4 border-b border-gray-100 dark:border-gray-700 last:border-0">
+    <div>
+      <p className="font-medium text-gray-900 dark:text-white">{label}</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>
+    </div>
+    <button onClick={() => onChange(!enabled)} className="relative">
+      {enabled ? (
+        <ToggleRight className="w-10 h-10 text-primary-500" />
+      ) : (
+        <ToggleLeft className="w-10 h-10 text-gray-300 dark:text-gray-600" />
+      )}
+    </button>
+  </div>
+);
+
+const TagEditor = ({ icon: Icon, iconColor, label, items, value, onChange, onAdd, onRemove, placeholder }) => (
+  <div className="card p-6">
+    <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+      <Icon className={`w-5 h-5 ${iconColor}`} />
+      {label}
+      <span className="ml-auto text-sm font-normal text-gray-500">{items.length} items</span>
+    </h2>
+    <div className="flex gap-2 mb-4">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), onAdd())}
+        placeholder={placeholder}
+        className="input-field flex-1"
+      />
+      <button onClick={onAdd} className="btn-primary px-4 flex items-center gap-1">
+        <Plus className="w-4 h-4" />
+        Add
+      </button>
+    </div>
+    <div className="flex flex-wrap gap-2">
+      {items.map((item) => (
+        <span key={item} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300">
+          {item}
+          <button onClick={() => onRemove(item)} className="hover:text-red-500 transition-colors">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </span>
+      ))}
+      {items.length === 0 && (
+        <p className="text-sm text-gray-400 dark:text-gray-500">No items added yet</p>
+      )}
+    </div>
+  </div>
+);
+
 const Settings = () => {
   const [settings, setSettings] = useState({
     siteName: '',
@@ -30,7 +83,6 @@ const Settings = () => {
       const res = await api.get('/admin/settings');
       const data = res.data.data;
       setSettings({
-        ...settings,
         ...data,
         areas: data.areas || [],
         colleges: data.colleges || [],
@@ -145,59 +197,6 @@ const Settings = () => {
     reader.readAsDataURL(file);
   };
 
-  const ToggleSwitch = ({ enabled, onChange, label, description }) => (
-    <div className="flex items-center justify-between py-4 border-b border-gray-100 dark:border-gray-700 last:border-0">
-      <div>
-        <p className="font-medium text-gray-900 dark:text-white">{label}</p>
-        <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>
-      </div>
-      <button onClick={() => onChange(!enabled)} className="relative">
-        {enabled ? (
-          <ToggleRight className="w-10 h-10 text-primary-500" />
-        ) : (
-          <ToggleLeft className="w-10 h-10 text-gray-300 dark:text-gray-600" />
-        )}
-      </button>
-    </div>
-  );
-
-  const TagEditor = ({ icon: Icon, iconColor, label, items, value, onChange, onAdd, onRemove, placeholder }) => (
-    <div className="card p-6">
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-        <Icon className={`w-5 h-5 ${iconColor}`} />
-        {label}
-        <span className="ml-auto text-sm font-normal text-gray-500">{items.length} items</span>
-      </h2>
-      <div className="flex gap-2 mb-4">
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), onAdd())}
-          placeholder={placeholder}
-          className="input-field flex-1"
-        />
-        <button onClick={onAdd} className="btn-primary px-4 flex items-center gap-1">
-          <Plus className="w-4 h-4" />
-          Add
-        </button>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {items.map((item) => (
-          <span key={item} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300">
-            {item}
-            <button onClick={() => onRemove(item)} className="hover:text-red-500 transition-colors">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </span>
-        ))}
-        {items.length === 0 && (
-          <p className="text-sm text-gray-400 dark:text-gray-500">No items added yet</p>
-        )}
-      </div>
-    </div>
-  );
-
   if (loading) {
     return (
       <div className="space-y-6">
@@ -237,7 +236,7 @@ const Settings = () => {
               <input
                 type="text"
                 value={settings.siteName}
-                onChange={(e) => setSettings({ ...settings, siteName: e.target.value })}
+                onChange={(e) => setSettings(prev => ({ ...prev, siteName: e.target.value }))}
                 className="input-field"
               />
             </div>
@@ -245,7 +244,7 @@ const Settings = () => {
               <label className="block text-sm font-medium mb-1">Site Description</label>
               <textarea
                 value={settings.siteDescription}
-                onChange={(e) => setSettings({ ...settings, siteDescription: e.target.value })}
+                onChange={(e) => setSettings(prev => ({ ...prev, siteDescription: e.target.value }))}
                 className="input-field"
                 rows={3}
               />
@@ -264,7 +263,7 @@ const Settings = () => {
               <input
                 type="email"
                 value={settings.contactEmail}
-                onChange={(e) => setSettings({ ...settings, contactEmail: e.target.value })}
+                onChange={(e) => setSettings(prev => ({ ...prev, contactEmail: e.target.value }))}
                 className="input-field"
               />
             </div>
@@ -273,7 +272,7 @@ const Settings = () => {
               <input
                 type="text"
                 value={settings.contactPhone}
-                onChange={(e) => setSettings({ ...settings, contactPhone: e.target.value })}
+                onChange={(e) => setSettings(prev => ({ ...prev, contactPhone: e.target.value }))}
                 className="input-field"
               />
             </div>
@@ -292,7 +291,7 @@ const Settings = () => {
               min="1"
               max="20"
               value={settings.maxImagesPerPG}
-              onChange={(e) => setSettings({ ...settings, maxImagesPerPG: parseInt(e.target.value) || 5 })}
+              onChange={(e) => setSettings(prev => ({ ...prev, maxImagesPerPG: parseInt(e.target.value) || 5 }))}
               className="input-field"
             />
           </div>
@@ -302,13 +301,13 @@ const Settings = () => {
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Platform Toggles</h2>
           <ToggleSwitch
             enabled={settings.maintenanceMode}
-            onChange={(val) => setSettings({ ...settings, maintenanceMode: val })}
+            onChange={(val) => setSettings(prev => ({ ...prev, maintenanceMode: val }))}
             label="Maintenance Mode"
             description="Temporarily disable public access to the site"
           />
           <ToggleSwitch
             enabled={settings.allowRegistrations}
-            onChange={(val) => setSettings({ ...settings, allowRegistrations: val })}
+            onChange={(val) => setSettings(prev => ({ ...prev, allowRegistrations: val }))}
             label="Allow Registrations"
             description="Allow new users to create accounts"
           />
@@ -318,7 +317,7 @@ const Settings = () => {
           icon={MapPin}
           iconColor="text-accent-500"
           label="Search Areas"
-          items={settings.areas}
+          items={settings.areas || []}
           value={newArea}
           onChange={setNewArea}
           onAdd={addArea}
@@ -330,7 +329,7 @@ const Settings = () => {
           icon={GraduationCap}
           iconColor="text-primary-500"
           label="Search Colleges"
-          items={settings.colleges}
+          items={settings.colleges || []}
           value={newCollege}
           onChange={setNewCollege}
           onAdd={addCollege}
@@ -342,7 +341,7 @@ const Settings = () => {
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <LayoutGrid className="w-5 h-5 text-accent-500" />
             Popular Areas (Homepage)
-            <span className="ml-auto text-sm font-normal text-gray-500">{settings.popularAreas.length} areas</span>
+            <span className="ml-auto text-sm font-normal text-gray-500">{(settings.popularAreas || []).length} areas</span>
           </h2>
           <div className="flex flex-col sm:flex-row gap-2 mb-4">
             <input
@@ -367,7 +366,7 @@ const Settings = () => {
             </button>
           </div>
           <div className="space-y-3">
-            {settings.popularAreas.map((area, index) => (
+            {(settings.popularAreas || []).map((area, index) => (
               <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                 <div className="relative flex-shrink-0">
                   <img
@@ -407,7 +406,7 @@ const Settings = () => {
                 </button>
               </div>
             ))}
-            {settings.popularAreas.length === 0 && (
+            {(settings.popularAreas || []).length === 0 && (
               <p className="text-sm text-gray-400 dark:text-gray-500">No popular areas added yet</p>
             )}
           </div>
