@@ -14,21 +14,28 @@ exports.register = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
     const user = await User.create({
       name,
       email,
       password,
       role: 'user',
       favorites: [],
-      emailVerified: true,
+      emailVerified: false,
+      verificationOTP: otp,
+      verificationOTPExpiry: otpExpiry,
     });
+
+    await sendEmailOTP(email, otp);
 
     console.log(`New user registered: ${email}`);
 
     res.status(201).json({
       success: true,
-      message: 'Registration successful.',
-      requiresVerification: false,
+      message: 'Registration successful. Please verify your email.',
+      requiresVerification: true,
       email,
     });
   } catch (err) {
@@ -56,7 +63,7 @@ exports.registerPhone = async (req, res, next) => {
       role: 'user',
       favorites: [],
       phoneVerified: true,
-      emailVerified: true,
+      emailVerified: false,
     });
 
     console.log(`New user registered via phone: ${phone}`);
@@ -292,7 +299,8 @@ const sendTokenResponse = (user, statusCode, res) => {
   });
   const options = {
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    httpOnly: true
+    httpOnly: true,
+    sameSite: 'lax'
   };
 
   if (process.env.NODE_ENV === 'production') {

@@ -30,9 +30,14 @@ const Register = () => {
         toast.success('Account created! You can now sign in.');
         navigate('/login');
       } else {
-        await register(name, email, password);
-        toast.success('Account created! You can now sign in.');
-        navigate('/login');
+        const res = await register(name, email, password);
+        if (res.requiresVerification) {
+          toast.success('Account created! Please verify your email.');
+          navigate(`/verify-email?email=${encodeURIComponent(email)}`);
+        } else {
+          toast.success('Account created! You can now sign in.');
+          navigate('/login');
+        }
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
@@ -144,7 +149,7 @@ const Register = () => {
                   className="input-field pl-10 pr-10"
                   placeholder="••••••••"
                   required
-                  minLength={6}
+                  minLength={8}
                 />
                 <button
                   type="button"
