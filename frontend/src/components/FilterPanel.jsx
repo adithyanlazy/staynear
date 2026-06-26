@@ -179,6 +179,13 @@ const FilterPanel = ({ filters, setFilters, isOpen, setIsOpen }) => {
               </div>
             </div>
           </div>
+
+          <button
+            onClick={() => setIsOpen(false)}
+            className="lg:hidden w-full mt-6 btn-primary"
+          >
+            Show Results
+          </button>
         </div>
       </div>
     </>
