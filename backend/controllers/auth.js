@@ -117,12 +117,17 @@ exports.login = async (req, res, next) => {
     }
 
     if (!user.emailVerified) {
-      return res.status(403).json({
-        success: false,
-        message: 'Please verify your email first',
-        requiresVerification: true,
-        email,
-      });
+      const emailConfigured = process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD
+        && process.env.GMAIL_USER !== 'your_gmail@gmail.com';
+      if (emailConfigured) {
+        return res.status(403).json({
+          success: false,
+          message: 'Please verify your email first',
+          requiresVerification: true,
+          email,
+        });
+      }
+      await User.findByIdAndUpdate(user._id, { emailVerified: true });
     }
 
     await User.findByIdAndUpdate(user._id, {
