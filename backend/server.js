@@ -82,6 +82,18 @@ app.get('/api/suggestions', async (req, res) => {
   }
 });
 
+app.get('/api/site-logo', async (req, res) => {
+  try {
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = await Settings.create({});
+    }
+    res.status(200).json({ success: true, data: { siteLogo: settings.siteLogo || '', siteName: settings.siteName || 'StayNear' } });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 app.get('/api/testimonials', async (req, res) => {
   try {
     let settings = await Settings.findOne();

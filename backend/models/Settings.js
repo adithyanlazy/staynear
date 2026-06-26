@@ -5,6 +5,10 @@ const SettingsSchema = new mongoose.Schema({
     type: String,
     default: 'StayNear'
   },
+  siteLogo: {
+    type: String,
+    default: ''
+  },
   siteDescription: {
     type: String,
     default: 'Find the best PG accommodations near your college in Mangalore'

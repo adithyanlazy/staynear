@@ -59,6 +59,7 @@ const TagEditor = ({ icon: Icon, iconColor, label, items, value, onChange, onAdd
 const Settings = () => {
   const [settings, setSettings] = useState({
     siteName: '',
+    siteLogo: '',
     siteDescription: '',
     contactEmail: '',
     contactPhone: '',
@@ -105,6 +106,7 @@ const Settings = () => {
     try {
       const payload = {
         siteName: settings.siteName,
+        siteLogo: settings.siteLogo || '',
         siteDescription: settings.siteDescription,
         contactEmail: settings.contactEmail,
         contactPhone: settings.contactPhone,
@@ -295,6 +297,56 @@ const Settings = () => {
                 onChange={(e) => setSettings(prev => ({ ...prev, siteName: e.target.value }))}
                 className="input-field"
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Site Logo</label>
+              <div className="flex items-center gap-3">
+                <label className="relative cursor-pointer">
+                  <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-500 transition-colors">
+                    {settings.siteLogo ? (
+                      <img src={settings.siteLogo} alt="Logo" className="w-full h-full object-cover" />
+                    ) : (
+                      <Image className="w-6 h-6 text-gray-400" />
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (!file) return;
+                      if (file.size > 2 * 1024 * 1024) {
+                        toast.error('Image must be under 2MB');
+                        return;
+                      }
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        setSettings(prev => ({ ...prev, siteLogo: ev.target.result }));
+                        toast.success('Logo uploaded');
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={settings.siteLogo}
+                    onChange={(e) => setSettings(prev => ({ ...prev, siteLogo: e.target.value }))}
+                    placeholder="Logo URL (or click image to upload)"
+                    className="input-field text-sm"
+                  />
+                  {settings.siteLogo && (
+                    <button
+                      onClick={() => setSettings(prev => ({ ...prev, siteLogo: '' }))}
+                      className="text-sm text-red-500 hover:text-red-600 mt-1"
+                    >
+                      Remove logo
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Site Description</label>

@@ -191,11 +191,12 @@ exports.updateSettings = async (req, res, next) => {
     if (!settings) {
       settings = await Settings.create(req.body);
     } else {
-      const { areas, colleges, popularAreas, siteName, siteDescription, contactEmail, contactPhone, maintenanceMode, allowRegistrations, maxImagesPerPG, happyStudents, avgRating, testimonials } = req.body;
+      const { areas, colleges, popularAreas, siteName, siteLogo, siteDescription, contactEmail, contactPhone, maintenanceMode, allowRegistrations, maxImagesPerPG, happyStudents, avgRating, testimonials } = req.body;
       if (areas !== undefined) settings.areas = areas;
       if (colleges !== undefined) settings.colleges = colleges;
       if (popularAreas !== undefined) settings.popularAreas = popularAreas;
       if (siteName !== undefined) settings.siteName = siteName;
+      if (siteLogo !== undefined) settings.siteLogo = siteLogo;
       if (siteDescription !== undefined) settings.siteDescription = siteDescription;
       if (contactEmail !== undefined) settings.contactEmail = contactEmail;
       if (contactPhone !== undefined) settings.contactPhone = contactPhone;

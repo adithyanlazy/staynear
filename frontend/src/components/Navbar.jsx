@@ -1,14 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Home, Heart, User, LogOut, Shield, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import api from '../utils/api';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [siteLogo, setSiteLogo] = useState('');
+  const [siteName, setSiteName] = useState('StayNear');
   const { darkMode, toggleDarkMode } = useTheme();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const res = await api.get('/site-logo');
+        if (res.data.data.siteLogo) setSiteLogo(res.data.data.siteLogo);
+        if (res.data.data.siteName) setSiteName(res.data.data.siteName);
+      } catch (err) {
+        // keep defaults
+      }
+    };
+    fetchLogo();
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -21,10 +37,14 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
-              <Home className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-display font-bold gradient-text">StayNear</span>
+            {siteLogo ? (
+              <img src={siteLogo} alt={siteName} className="h-10 w-10 rounded-xl object-cover" />
+            ) : (
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
+                <Home className="w-5 h-5 text-white" />
+              </div>
+            )}
+            <span className="text-xl font-display font-bold gradient-text">{siteName}</span>
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">

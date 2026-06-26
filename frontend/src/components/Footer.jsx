@@ -5,22 +5,28 @@ import api from '../utils/api';
 
 const Footer = () => {
   const [contact, setContact] = useState({ contactEmail: 'contact@staynear.com', contactPhone: '+91 9876543210' });
+  const [siteLogo, setSiteLogo] = useState('');
+  const [siteName, setSiteName] = useState('StayNear');
 
   useEffect(() => {
-    const fetchContact = async () => {
+    const fetchData = async () => {
       try {
-        const res = await api.get('/admin/settings');
-        if (res.data.data.contactEmail || res.data.data.contactPhone) {
-          setContact({
-            contactEmail: res.data.data.contactEmail || 'contact@staynear.com',
-            contactPhone: res.data.data.contactPhone || '+91 9876543210',
-          });
-        }
+        const [settingsRes, logoRes] = await Promise.all([
+          api.get('/admin/settings'),
+          api.get('/site-logo'),
+        ]);
+        const s = settingsRes.data.data;
+        setContact({
+          contactEmail: s.contactEmail || 'contact@staynear.com',
+          contactPhone: s.contactPhone || '+91 9876543210',
+        });
+        if (logoRes.data.data.siteLogo) setSiteLogo(logoRes.data.data.siteLogo);
+        if (logoRes.data.data.siteName) setSiteName(logoRes.data.data.siteName);
       } catch (err) {
         // keep defaults
       }
     };
-    fetchContact();
+    fetchData();
   }, []);
 
   return (
@@ -29,10 +35,14 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
-                <Home className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-display font-bold text-white">StayNear</span>
+              {siteLogo ? (
+                <img src={siteLogo} alt={siteName} className="h-10 w-10 rounded-xl object-cover" />
+              ) : (
+                <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
+                  <Home className="w-5 h-5 text-white" />
+                </div>
+              )}
+              <span className="text-xl font-display font-bold text-white">{siteName}</span>
             </Link>
             <p className="text-sm text-gray-400">
               Find the best PG accommodations near your college in Mangalore. 
