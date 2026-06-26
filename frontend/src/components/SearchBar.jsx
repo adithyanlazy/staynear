@@ -60,7 +60,33 @@ const SearchBar = ({ variant = 'hero' }) => {
 
   if (variant === 'compact') {
     return (
-      <form onSubmit={handleSearch} className="flex gap-2">
+      <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
+        <div className="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
+          <button
+            type="button"
+            onClick={() => { setSearchType('college'); setQuery(''); }}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+              searchType === 'college'
+                ? 'bg-white dark:bg-gray-600 text-primary-500 shadow-md'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            <GraduationCap className="w-4 h-4" />
+            College
+          </button>
+          <button
+            type="button"
+            onClick={() => { setSearchType('area'); setQuery(''); }}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+              searchType === 'area'
+                ? 'bg-white dark:bg-gray-600 text-primary-500 shadow-md'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            <MapPin className="w-4 h-4" />
+            Area
+          </button>
+        </div>
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
@@ -72,7 +98,7 @@ const SearchBar = ({ variant = 'hero' }) => {
             }}
             onFocus={() => setShowDropdown(true)}
             onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-            placeholder="Search by college or area..."
+            placeholder={searchType === 'college' ? 'Select your college...' : 'Choose an area...'}
             className="input-field pl-10"
           />
           {showDropdown && query && filteredItems.length > 0 && (
