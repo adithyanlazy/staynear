@@ -1,6 +1,5 @@
 const Review = require('../models/Review');
 const PG = require('../models/PG');
-const User = require('../models/User');
 
 exports.getReviews = async (req, res, next) => {
   try {

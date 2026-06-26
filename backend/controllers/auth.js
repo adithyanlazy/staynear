@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
-const PG = require('../models/PG');
 const { sendOTP: sendEmailOTP } = require('../utils/email');
 
 exports.register = async (req, res, next) => {

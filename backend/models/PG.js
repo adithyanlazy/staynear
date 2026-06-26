@@ -7,7 +7,6 @@ const PGSchema = new mongoose.Schema({
     trim: true,
     maxlength: [100, 'Name cannot be more than 100 characters']
   },
-  slug: String,
   description: {
     type: String,
     required: [true, 'Please add a description'],
@@ -102,10 +101,5 @@ const PGSchema = new mongoose.Schema({
 PGSchema.index({ name: 'text', description: 'text', area: 'text' });
 PGSchema.index({ area: 1, gender: 1, rent: 1 });
 PGSchema.index({ collegeNearby: 1 });
-
-PGSchema.pre('save', function (next) {
-  this.slug = this.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  next();
-});
 
 module.exports = mongoose.model('PG', PGSchema);

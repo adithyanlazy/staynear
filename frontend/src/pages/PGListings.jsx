@@ -4,6 +4,7 @@ import { Search, SlidersHorizontal } from 'lucide-react';
 import PGCard from '../components/PGCard';
 import FilterPanel from '../components/FilterPanel';
 import LoadingSkeleton from '../components/LoadingSkeleton';
+import toast from 'react-hot-toast';
 import api from '../utils/api';
 
 const PGListings = () => {

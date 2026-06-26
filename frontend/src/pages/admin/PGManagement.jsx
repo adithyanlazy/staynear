@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Edit, Trash2, Search, X, Star, ImagePlus, GripVertical, Video, Film, Upload, UploadCloud } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, X, Star, ImagePlus, GripVertical, Video, Film, UploadCloud } from 'lucide-react';
 import { AREAS, COLLEGES, GENDER_OPTIONS, SHARING_OPTIONS, AMENITIES } from '../../utils/constants';
 import ConfirmDialog from '../../components/admin/ConfirmDialog';
 import toast from 'react-hot-toast';

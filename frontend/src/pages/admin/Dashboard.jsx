@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Building2, Users, MessageSquare, Star, TrendingUp, ArrowRight } from 'lucide-react';
+import { Building2, Users, MessageSquare, Star, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import StatsCard from '../../components/admin/StatsCard';
 import api from '../../utils/api';

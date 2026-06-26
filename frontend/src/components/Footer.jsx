@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Home, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { Home, Mail, Phone, MapPin } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -18,18 +18,6 @@ const Footer = () => {
               Comfortable, affordable, and secure stays for students.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="hover:text-primary-500 transition-colors">
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a href="#" className="hover:text-primary-500 transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="hover:text-primary-500 transition-colors">
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a href="#" className="hover:text-primary-500 transition-colors">
-                <Linkedin className="w-5 h-5" />
-              </a>
             </div>
           </div>
 

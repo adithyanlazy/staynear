@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Star, Heart, Phone, Wifi, Utensils, Snowflake, Users, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Star, Heart, Phone, Utensils, Snowflake, Users, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import PGCard from '../components/PGCard';
 import LoadingSkeleton from '../components/LoadingSkeleton';
