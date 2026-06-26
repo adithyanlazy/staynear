@@ -16,14 +16,18 @@ app.use(helmet());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100
+  max: 500,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.headers['x-forwarded-for'] || req.ip,
 });
 app.use('/api', limiter);
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
-  message: { success: false, message: 'Too many attempts. Please try again later.' }
+  max: 50,
+  message: { success: false, message: 'Too many attempts. Please try again later.' },
+  keyGenerator: (req) => req.headers['x-forwarded-for'] || req.ip,
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/login-phone', authLimiter);
