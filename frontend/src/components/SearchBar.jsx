@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, GraduationCap, IndianRupee } from 'lucide-react';
+import api from '../utils/api';
 import { COLLEGES, AREAS } from '../utils/constants';
 
 const SearchBar = ({ variant = 'hero' }) => {
@@ -9,9 +10,24 @@ const SearchBar = ({ variant = 'hero' }) => {
   const [minRent, setMinRent] = useState('');
   const [maxRent, setMaxRent] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [colleges, setColleges] = useState(COLLEGES);
+  const [areas, setAreas] = useState(AREAS);
   const navigate = useNavigate();
 
-  const items = searchType === 'college' ? COLLEGES : AREAS;
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      try {
+        const res = await api.get('/suggestions');
+        if (res.data.data.colleges?.length) setColleges(res.data.data.colleges);
+        if (res.data.data.areas?.length) setAreas(res.data.data.areas);
+      } catch (err) {
+        // fallback to constants already set
+      }
+    };
+    fetchSuggestions();
+  }, []);
+
+  const items = searchType === 'college' ? colleges : areas;
   const filteredItems = items.filter(item =>
     item.toLowerCase().includes(query.toLowerCase())
   );

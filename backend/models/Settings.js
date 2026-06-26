@@ -28,6 +28,14 @@ const SettingsSchema = new mongoose.Schema({
   maxImagesPerPG: {
     type: Number,
     default: 5
+  },
+  areas: {
+    type: [String],
+    default: ['Surathkal', 'Mangalore City', 'Bejai', 'Kankanady', 'Hampankatta', 'Kadri', 'Falnir', 'Boloor', 'Kapikad', 'Nanthoor', 'Valacchil', 'Moodbidri', 'Karkala', 'Udupi']
+  },
+  colleges: {
+    type: [String],
+    default: ['NITK Surathkal', 'St Aloysius College', 'Yenepoya University', 'Srinivas University', 'Canara Engineering College', 'AJ Institute', 'Mangalore University', 'SDM College', 'KMC Mangalore']
   }
 });
 

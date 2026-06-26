@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Globe, Mail, Phone, Image, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Save, Globe, Mail, Phone, Image, ToggleLeft, ToggleRight, MapPin, GraduationCap, Plus, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../utils/api';
 
@@ -12,9 +12,13 @@ const Settings = () => {
     maintenanceMode: false,
     allowRegistrations: true,
     maxImagesPerPG: 5,
+    areas: [],
+    colleges: [],
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [newArea, setNewArea] = useState('');
+  const [newCollege, setNewCollege] = useState('');
 
   useEffect(() => { fetchSettings(); }, []);
 
@@ -41,6 +45,36 @@ const Settings = () => {
     }
   };
 
+  const addArea = () => {
+    const val = newArea.trim();
+    if (!val) return;
+    if (settings.areas.includes(val)) {
+      toast.error('Area already exists');
+      return;
+    }
+    setSettings({ ...settings, areas: [...settings.areas, val] });
+    setNewArea('');
+  };
+
+  const removeArea = (area) => {
+    setSettings({ ...settings, areas: settings.areas.filter(a => a !== area) });
+  };
+
+  const addCollege = () => {
+    const val = newCollege.trim();
+    if (!val) return;
+    if (settings.colleges.includes(val)) {
+      toast.error('College already exists');
+      return;
+    }
+    setSettings({ ...settings, colleges: [...settings.colleges, val] });
+    setNewCollege('');
+  };
+
+  const removeCollege = (college) => {
+    setSettings({ ...settings, colleges: settings.colleges.filter(c => c !== college) });
+  };
+
   const ToggleSwitch = ({ enabled, onChange, label, description }) => (
     <div className="flex items-center justify-between py-4 border-b border-gray-100 dark:border-gray-700 last:border-0">
       <div>
@@ -54,6 +88,43 @@ const Settings = () => {
           <ToggleLeft className="w-10 h-10 text-gray-300 dark:text-gray-600" />
         )}
       </button>
+    </div>
+  );
+
+  const TagEditor = ({ icon: Icon, iconColor, label, items, value, onChange, onAdd, onRemove, placeholder }) => (
+    <div className="card p-6">
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <Icon className={`w-5 h-5 ${iconColor}`} />
+        {label}
+        <span className="ml-auto text-sm font-normal text-gray-500">{items.length} items</span>
+      </h2>
+      <div className="flex gap-2 mb-4">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), onAdd())}
+          placeholder={placeholder}
+          className="input-field flex-1"
+        />
+        <button onClick={onAdd} className="btn-primary px-4 flex items-center gap-1">
+          <Plus className="w-4 h-4" />
+          Add
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {items.map((item) => (
+          <span key={item} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300">
+            {item}
+            <button onClick={() => onRemove(item)} className="hover:text-red-500 transition-colors">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </span>
+        ))}
+        {items.length === 0 && (
+          <p className="text-sm text-gray-400 dark:text-gray-500">No items added yet</p>
+        )}
+      </div>
     </div>
   );
 
@@ -172,6 +243,30 @@ const Settings = () => {
             description="Allow new users to create accounts"
           />
         </div>
+
+        <TagEditor
+          icon={MapPin}
+          iconColor="text-accent-500"
+          label="Search Areas"
+          items={settings.areas}
+          value={newArea}
+          onChange={setNewArea}
+          onAdd={addArea}
+          onRemove={removeArea}
+          placeholder="Add a new area..."
+        />
+
+        <TagEditor
+          icon={GraduationCap}
+          iconColor="text-primary-500"
+          label="Search Colleges"
+          items={settings.colleges}
+          value={newCollege}
+          onChange={setNewCollege}
+          onAdd={addCollege}
+          onRemove={removeCollege}
+          placeholder="Add a new college..."
+        />
       </div>
     </div>
   );
