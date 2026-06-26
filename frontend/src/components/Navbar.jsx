@@ -131,6 +131,14 @@ const Navbar = () => {
               </Link>
             )}
             <hr className="border-gray-200 dark:border-gray-700" />
+            <button
+              onClick={toggleDarkMode}
+              className="flex items-center gap-2 py-2 text-gray-700 dark:text-gray-300 hover:text-primary-500 font-medium"
+            >
+              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {darkMode ? 'Light Mode' : 'Dark Mode'}
+            </button>
+            <hr className="border-gray-200 dark:border-gray-700" />
             {user ? (
               <div className="space-y-3">
                 <div className="flex items-center space-x-2 py-2">
