@@ -205,6 +205,27 @@ const Settings = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleTestimonialAvatarFile = (index, file) => {
+    if (!file || !file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image must be under 2MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (index === -1) {
+        setNewTestimonial(prev => ({ ...prev, avatar: e.target.result }));
+      } else {
+        updateTestimonial(index, 'avatar', e.target.result);
+      }
+      toast.success('Avatar uploaded');
+    };
+    reader.readAsDataURL(file);
+  };
+
   const addTestimonial = () => {
     const { name, college, rating, comment, avatar } = newTestimonial;
     if (!name.trim() || !comment.trim()) {
@@ -496,13 +517,30 @@ const Settings = () => {
               className="input-field text-sm sm:col-span-2"
             />
             <div className="flex gap-2">
-              <input
-                type="text"
-                value={newTestimonial.avatar}
-                onChange={(e) => setNewTestimonial(prev => ({ ...prev, avatar: e.target.value }))}
-                placeholder="Avatar URL"
-                className="input-field text-sm flex-1"
-              />
+              <div className="flex items-center gap-2 flex-1">
+                <label className="relative flex-shrink-0 cursor-pointer">
+                  <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
+                    {newTestimonial.avatar ? (
+                      <img src={newTestimonial.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <Image className="w-5 h-5 text-gray-400" />
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleTestimonialAvatarFile(-1, e.target.files[0])}
+                  />
+                </label>
+                <input
+                  type="text"
+                  value={newTestimonial.avatar}
+                  onChange={(e) => setNewTestimonial(prev => ({ ...prev, avatar: e.target.value }))}
+                  placeholder="Avatar URL"
+                  className="input-field text-sm flex-1"
+                />
+              </div>
               <select
                 value={newTestimonial.rating}
                 onChange={(e) => setNewTestimonial(prev => ({ ...prev, rating: parseInt(e.target.value) }))}
@@ -554,13 +592,30 @@ const Settings = () => {
                     className="input-field text-sm"
                     placeholder="Comment"
                   />
-                  <input
-                    type="text"
-                    value={t.avatar}
-                    onChange={(e) => updateTestimonial(index, 'avatar', e.target.value)}
-                    className="input-field text-sm"
-                    placeholder="Avatar URL"
-                  />
+                  <div className="flex items-center gap-2">
+                    <label className="relative flex-shrink-0 cursor-pointer">
+                      <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
+                        {t.avatar ? (
+                          <img src={t.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                        ) : (
+                          <Image className="w-5 h-5 text-gray-400" />
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleTestimonialAvatarFile(index, e.target.files[0])}
+                      />
+                    </label>
+                    <input
+                      type="text"
+                      value={t.avatar}
+                      onChange={(e) => updateTestimonial(index, 'avatar', e.target.value)}
+                      className="input-field text-sm flex-1"
+                      placeholder="Avatar URL"
+                    />
+                  </div>
                 </div>
                 <button onClick={() => removeTestimonial(index)} className="flex items-center gap-1 px-3 py-1.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0">
                   <X className="w-4 h-4" />
