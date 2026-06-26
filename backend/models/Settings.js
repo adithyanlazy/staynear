@@ -50,6 +50,14 @@ const SettingsSchema = new mongoose.Schema({
       { name: 'Kankanady', image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400' },
       { name: 'Falnir', image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400' }
     ]
+  },
+  happyStudents: {
+    type: String,
+    default: '2000+'
+  },
+  avgRating: {
+    type: String,
+    default: '4.5'
   }
 });
 

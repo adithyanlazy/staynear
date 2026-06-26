@@ -176,7 +176,9 @@ exports.getStats = async (req, res, next) => {
       data: {
         totalPGs,
         totalAreas: settings.areas.length,
-        avgRent: avgResult.length > 0 ? Math.round(avgResult[0].avgRent) : 0
+        avgRent: avgResult.length > 0 ? Math.round(avgResult[0].avgRent) : 0,
+        happyStudents: settings.happyStudents || '2000+',
+        avgRating: settings.avgRating || '4.5'
       }
     });
   } catch (err) {

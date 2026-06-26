@@ -68,6 +68,8 @@ const Settings = () => {
     areas: [],
     colleges: [],
     popularAreas: [],
+    happyStudents: '2000+',
+    avgRating: '4.5',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -109,6 +111,8 @@ const Settings = () => {
         areas: settings.areas || [],
         colleges: settings.colleges || [],
         popularAreas: settings.popularAreas || [],
+        happyStudents: settings.happyStudents || '2000+',
+        avgRating: settings.avgRating || '4.5',
       };
       await api.put('/admin/settings', payload);
       toast.success('Settings saved successfully');
@@ -292,6 +296,26 @@ const Settings = () => {
               max="20"
               value={settings.maxImagesPerPG}
               onChange={(e) => setSettings(prev => ({ ...prev, maxImagesPerPG: parseInt(e.target.value) || 5 }))}
+              className="input-field"
+            />
+          </div>
+          <div className="mt-4">
+            <label className="block text-sm font-medium mb-1">Happy Students</label>
+            <input
+              type="text"
+              value={settings.happyStudents}
+              onChange={(e) => setSettings(prev => ({ ...prev, happyStudents: e.target.value }))}
+              placeholder="e.g. 2000+"
+              className="input-field"
+            />
+          </div>
+          <div className="mt-4">
+            <label className="block text-sm font-medium mb-1">Avg Rating</label>
+            <input
+              type="text"
+              value={settings.avgRating}
+              onChange={(e) => setSettings(prev => ({ ...prev, avgRating: e.target.value }))}
+              placeholder="e.g. 4.5"
               className="input-field"
             />
           </div>
