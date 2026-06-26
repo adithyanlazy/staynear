@@ -101,7 +101,7 @@ const SearchBar = ({ variant = 'hero' }) => {
             placeholder={searchType === 'college' ? 'Select your college...' : 'Choose an area...'}
             className="input-field pl-10"
           />
-          {showDropdown && query && filteredItems.length > 0 && (
+          {showDropdown && filteredItems.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-60 overflow-auto">
               {filteredItems.map((item) => (
                 <button
