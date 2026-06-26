@@ -85,13 +85,22 @@ const Navbar = () => {
             )}
           </div>
 
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label={isOpen ? 'Close menu' : 'Open menu'}
-            className="md:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              onClick={toggleDarkMode}
+              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? 'Close menu' : 'Open menu'}
+              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -130,14 +139,6 @@ const Navbar = () => {
                 Admin Panel
               </Link>
             )}
-            <hr className="border-gray-200 dark:border-gray-700" />
-            <button
-              onClick={toggleDarkMode}
-              className="flex items-center gap-2 py-2 text-gray-700 dark:text-gray-300 hover:text-primary-500 font-medium"
-            >
-              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              {darkMode ? 'Light Mode' : 'Dark Mode'}
-            </button>
             <hr className="border-gray-200 dark:border-gray-700" />
             {user ? (
               <div className="space-y-3">
