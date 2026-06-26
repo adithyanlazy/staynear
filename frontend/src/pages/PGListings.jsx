@@ -120,6 +120,12 @@ const PGListings = () => {
                     <button onClick={() => setFilters(prev => ({ ...prev, gender: '' }))} className="ml-1 hover:text-accent-900">×</button>
                   </span>
                 )}
+                {(filters.minRent || filters.maxRent) && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm">
+                    ₹{filters.minRent || '0'} – ₹{filters.maxRent || '∞'}
+                    <button onClick={() => setFilters(prev => ({ ...prev, minRent: '', maxRent: '' }))} className="ml-1 hover:text-green-900">×</button>
+                  </span>
+                )}
               </div>
             ) : null}
 
