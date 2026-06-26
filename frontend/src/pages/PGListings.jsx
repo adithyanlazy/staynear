@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import PGCard from '../components/PGCard';
 import FilterPanel from '../components/FilterPanel';
 import LoadingSkeleton from '../components/LoadingSkeleton';
+import SearchBar from '../components/SearchBar';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 
@@ -14,9 +15,6 @@ const PGListings = () => {
   const [total, setTotal] = useState(0);
   const [pagination, setPagination] = useState({});
   const [filterOpen, setFilterOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const debounceRef = useRef(null);
 
   const [filters, setFilters] = useState({
     area: searchParams.get('area') || '',
@@ -32,12 +30,15 @@ const PGListings = () => {
   });
 
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-    }, 300);
-    return () => clearTimeout(debounceRef.current);
-  }, [searchQuery]);
+    setFilters(prev => ({
+      ...prev,
+      area: searchParams.get('area') || '',
+      collegeNearby: searchParams.get('collegeNearby') || '',
+      minRent: searchParams.get('minRent') || '',
+      maxRent: searchParams.get('maxRent') || '',
+      page: 1,
+    }));
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchPGs = async () => {
@@ -47,7 +48,6 @@ const PGListings = () => {
         Object.entries(filters).forEach(([key, value]) => {
           if (value) params.append(key, value);
         });
-        if (debouncedSearch) params.append('search', debouncedSearch);
 
         const res = await api.get(`/pgs?${params.toString()}`);
         setPGs(res.data.data);
@@ -60,12 +60,7 @@ const PGListings = () => {
       }
     };
     fetchPGs();
-  }, [filters, debouncedSearch]);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setFilters(prev => ({ ...prev, page: 1 }));
-  };
+  }, [filters]);
 
   return (
     <div className="min-h-screen pt-20 pb-16">
@@ -93,21 +88,9 @@ const PGListings = () => {
 
           <div className="flex-1">
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <form onSubmit={handleSearch} className="flex-1 flex gap-2">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by name..."
-                    className="input-field pl-10"
-                  />
-                </div>
-                <button type="submit" className="btn-primary">
-                  Search
-                </button>
-              </form>
+              <div className="flex-1">
+                <SearchBar variant="compact" />
+              </div>
               <button
                 onClick={() => setFilterOpen(true)}
                 className="lg:hidden btn-secondary flex items-center gap-2"
@@ -169,7 +152,6 @@ const PGListings = () => {
                       sort: '-createdAt',
                       page: 1,
                     });
-                    setSearchQuery('');
                   }}
                   className="btn-primary"
                 >
