@@ -1,7 +1,28 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Home, Mail, Phone, MapPin } from 'lucide-react';
+import api from '../utils/api';
 
 const Footer = () => {
+  const [contact, setContact] = useState({ contactEmail: 'contact@staynear.com', contactPhone: '+91 9876543210' });
+
+  useEffect(() => {
+    const fetchContact = async () => {
+      try {
+        const res = await api.get('/admin/settings');
+        if (res.data.data.contactEmail || res.data.data.contactPhone) {
+          setContact({
+            contactEmail: res.data.data.contactEmail || 'contact@staynear.com',
+            contactPhone: res.data.data.contactPhone || '+91 9876543210',
+          });
+        }
+      } catch (err) {
+        // keep defaults
+      }
+    };
+    fetchContact();
+  }, []);
+
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -17,8 +38,6 @@ const Footer = () => {
               Find the best PG accommodations near your college in Mangalore. 
               Comfortable, affordable, and secure stays for students.
             </p>
-            <div className="flex space-x-4">
-            </div>
           </div>
 
           <div>
@@ -50,11 +69,11 @@ const Footer = () => {
               </li>
               <li className="flex items-center space-x-3">
                 <Phone className="w-4 h-4 text-primary-500" />
-                <span>+91 9876543210</span>
+                <span>{contact.contactPhone}</span>
               </li>
               <li className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-primary-500" />
-                <span>contact@staynear.com</span>
+                <span>{contact.contactEmail}</span>
               </li>
             </ul>
           </div>

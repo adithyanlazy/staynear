@@ -619,6 +619,10 @@ const PGManagement = () => {
                   <label className="block text-sm font-medium mb-1">Contact Number</label>
                   <input type="text" value={formData.contactNumber} onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })} className="input-field" required />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Contact Name</label>
+                  <input type="text" value={formData.contactName} onChange={(e) => setFormData({ ...formData, contactName: e.target.value })} className="input-field" placeholder="Owner" />
+                </div>
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-medium mb-1">Address</label>
                   <input type="text" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} className="input-field" required />
