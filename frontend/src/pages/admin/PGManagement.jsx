@@ -42,7 +42,7 @@ const PGManagement = () => {
 
   const fetchPGs = async () => {
     try {
-      const res = await api.get('/pgs?limit=100');
+      const res = await api.get('/pgs/admin/all?limit=100');
       setPGs(res.data.data);
     } catch (err) {
       toast.error('Failed to fetch PGs');

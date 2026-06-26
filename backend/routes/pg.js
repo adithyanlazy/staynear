@@ -10,9 +10,12 @@ const {
   getPGsByCollege,
   getSimilarPGs,
   getStats,
-  getPopularAreas
+  getPopularAreas,
+  getAllPGsAdmin
 } = require('../controllers/pg');
 const { protect, authorize } = require('../middleware/auth');
+
+router.route('/admin/all').get(protect, authorize('admin'), getAllPGsAdmin);
 
 router.route('/featured').get(getFeaturedPGs);
 router.route('/popular-areas').get(getPopularAreas);

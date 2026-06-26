@@ -181,6 +181,26 @@ exports.getStats = async (req, res, next) => {
   }
 };
 
+exports.getAllPGsAdmin = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 50;
+    const skip = (page - 1) * limit;
+
+    const total = await PG.countDocuments();
+    const data = await PG.find().sort('-createdAt').skip(skip).limit(limit);
+
+    res.status(200).json({
+      success: true,
+      count: data.length,
+      total,
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getPopularAreas = async (req, res, next) => {
   try {
     let settings = await Settings.findOne();
