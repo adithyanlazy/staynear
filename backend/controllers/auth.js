@@ -103,7 +103,7 @@ exports.login = async (req, res, next) => {
 
     await User.findByIdAndUpdate(user._id, {
       lastLogin: new Date(),
-      $inc: { loginCount: 1 },
+      $inc: { loginCount: 1, tokenVersion: 1 },
     });
 
     const updatedUser = await User.findById(user._id);
@@ -134,7 +134,7 @@ exports.loginPhone = async (req, res, next) => {
 
     await User.findByIdAndUpdate(user._id, {
       lastLogin: new Date(),
-      $inc: { loginCount: 1 },
+      $inc: { loginCount: 1, tokenVersion: 1 },
     });
 
     const updatedUser = await User.findById(user._id);
@@ -176,7 +176,7 @@ exports.verifyPhone = async (req, res, next) => {
       phoneOTPExpiry: null,
       verifiedDevices: newDevices,
       lastLogin: new Date(),
-      $inc: { loginCount: 1 },
+      $inc: { loginCount: 1, tokenVersion: 1 },
     });
 
     const updatedUser = await User.findById(user._id);
@@ -370,7 +370,7 @@ exports.getFavorites = async (req, res) => {
 };
 
 const sendTokenResponse = (user, statusCode, res) => {
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'staynear_jwt_secret_key_2024', {
+  const token = jwt.sign({ id: user._id, v: user.tokenVersion || 0 }, process.env.JWT_SECRET || 'staynear_jwt_secret_key_2024', {
     expiresIn: '7d'
   });
   const options = {

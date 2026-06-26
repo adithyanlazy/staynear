@@ -20,6 +20,9 @@ exports.protect = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ success: false, message: 'User not found' });
     }
+    if (user.tokenVersion !== decoded.v) {
+      return res.status(401).json({ success: false, message: 'Session expired. Please login again.' });
+    }
     req.user = user;
     next();
   } catch (err) {
