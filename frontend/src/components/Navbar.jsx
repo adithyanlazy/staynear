@@ -85,7 +85,12 @@ const Navbar = () => {
             )}
           </div>
 
-          <div className="flex items-center gap-2 md:hidden">
+          <div className="flex items-center gap-1 md:hidden">
+            {user && (
+              <Link to="/favorites" className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <Heart className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              </Link>
+            )}
             <button
               onClick={toggleDarkMode}
               aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
