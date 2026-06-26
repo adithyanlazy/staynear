@@ -1,5 +1,9 @@
 {
   "buildCommand": "npm install && npm run build",
   "outputDirectory": "dist",
-  "framework": "vite"
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://staynear-davp.onrender.com/api/$1" },
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+  ]
 }
