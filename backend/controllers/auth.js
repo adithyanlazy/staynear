@@ -3,8 +3,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
 const PG = require('../models/PG');
-const { sendOTP } = require('../utils/email');
-const { sendPhoneOTP } = require('../utils/phoneOtp');
+const { sendOTP: sendEmailOTP } = require('../utils/email');
 
 exports.register = async (req, res, next) => {
   try {
@@ -57,7 +56,7 @@ exports.registerPhone = async (req, res, next) => {
       role: 'user',
       favorites: [],
       phoneVerified: true,
-      verifiedDevices: [],
+      emailVerified: true,
     });
 
     console.log(`New user registered via phone: ${phone}`);
@@ -65,7 +64,6 @@ exports.registerPhone = async (req, res, next) => {
     res.status(201).json({
       success: true,
       message: 'Registration successful.',
-      requiresVerification: false,
       phone,
     });
   } catch (err) {
@@ -115,7 +113,7 @@ exports.login = async (req, res, next) => {
 
 exports.loginPhone = async (req, res, next) => {
   try {
-    const { phone, password, deviceId } = req.body;
+    const { phone, password } = req.body;
 
     if (!phone || !password) {
       return res.status(400).json({ success: false, message: 'Please provide phone and password' });
@@ -139,87 +137,6 @@ exports.loginPhone = async (req, res, next) => {
 
     const updatedUser = await User.findById(user._id);
     sendTokenResponse(updatedUser, 200, res);
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.verifyPhone = async (req, res, next) => {
-  try {
-    const { phone, otp, deviceId } = req.body;
-
-    if (!phone || !otp) {
-      return res.status(400).json({ success: false, message: 'Please provide phone and OTP' });
-    }
-
-    const user = await User.findOne({ phone });
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-
-    if (user.phoneOTP !== otp) {
-      return res.status(400).json({ success: false, message: 'Invalid OTP' });
-    }
-
-    if (new Date(user.phoneOTPExpiry) < new Date()) {
-      return res.status(400).json({ success: false, message: 'OTP expired. Please request a new one.' });
-    }
-
-    const verifiedDevices = user.verifiedDevices || [];
-    const newDevices = deviceId && !verifiedDevices.includes(deviceId)
-      ? [...verifiedDevices, deviceId]
-      : verifiedDevices;
-
-    await User.findByIdAndUpdate(user._id, {
-      phoneVerified: true,
-      phoneOTP: null,
-      phoneOTPExpiry: null,
-      verifiedDevices: newDevices,
-      lastLogin: new Date(),
-      $inc: { loginCount: 1, tokenVersion: 1 },
-    });
-
-    const updatedUser = await User.findById(user._id);
-    sendTokenResponse(updatedUser, 200, res);
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.resendPhoneOTP = async (req, res, next) => {
-  try {
-    const { phone, isLogin } = req.body;
-
-    if (!phone) {
-      return res.status(400).json({ success: false, message: 'Please provide phone number' });
-    }
-
-    const user = await User.findOne({ phone });
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-
-    if (user.phoneVerified && !isLogin) {
-      return res.status(400).json({ success: false, message: 'Phone already verified' });
-    }
-
-    const otp = crypto.randomInt(100000, 999999).toString();
-    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
-
-    await User.findByIdAndUpdate(user._id, {
-      phoneOTP: otp,
-      phoneOTPExpiry: otpExpiry,
-    });
-
-    await sendPhoneOTP(phone, otp, isLogin);
-
-    const response = { success: true, message: 'Verification code sent' };
-
-    if (process.env.NODE_ENV === 'development') {
-      response.devOTP = otp;
-    }
-
-    res.status(200).json(response);
   } catch (err) {
     next(err);
   }
@@ -288,7 +205,7 @@ exports.resendVerification = async (req, res, next) => {
       verificationOTPExpiry: otpExpiry,
     });
 
-    await sendOTP(email, otp);
+    await sendEmailOTP(email, otp);
 
     res.status(200).json({ success: true, message: 'Verification code sent' });
   } catch (err) {
@@ -370,7 +287,7 @@ exports.getFavorites = async (req, res) => {
 };
 
 const sendTokenResponse = (user, statusCode, res) => {
-  const token = jwt.sign({ id: user._id, v: user.tokenVersion || 0 }, process.env.JWT_SECRET || 'staynear_jwt_secret_key_2024', {
+  const token = jwt.sign({ id: user._id, v: user.tokenVersion || 0 }, process.env.JWT_SECRET, {
     expiresIn: '7d'
   });
   const options = {

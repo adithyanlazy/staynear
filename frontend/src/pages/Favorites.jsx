@@ -23,7 +23,11 @@ const Favorites = () => {
       }
     };
     fetchFavorites();
-  }, []);
+  }, [user?.favorites]);
+
+  const handleRemoveFavorite = (pgId) => {
+    setFavorites(prev => prev.filter(pg => pg._id !== pgId));
+  };
 
   return (
     <div className="min-h-screen pt-20 pb-16">
@@ -61,7 +65,7 @@ const Favorites = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {favorites.map(pg => (
-              <PGCard key={pg._id} pg={pg} />
+              <PGCard key={pg._id} pg={pg} onRemoveFavorite={handleRemoveFavorite} />
             ))}
           </div>
         )}

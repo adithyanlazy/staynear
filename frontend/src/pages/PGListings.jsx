@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import PGCard from '../components/PGCard';
@@ -14,6 +14,8 @@ const PGListings = () => {
   const [pagination, setPagination] = useState({});
   const [filterOpen, setFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debounceRef = useRef(null);
 
   const [filters, setFilters] = useState({
     area: searchParams.get('area') || '',
@@ -29,6 +31,14 @@ const PGListings = () => {
   });
 
   useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(debounceRef.current);
+  }, [searchQuery]);
+
+  useEffect(() => {
     const fetchPGs = async () => {
       setLoading(true);
       try {
@@ -36,20 +46,20 @@ const PGListings = () => {
         Object.entries(filters).forEach(([key, value]) => {
           if (value) params.append(key, value);
         });
-        if (searchQuery) params.append('search', searchQuery);
+        if (debouncedSearch) params.append('search', debouncedSearch);
 
         const res = await api.get(`/pgs?${params.toString()}`);
         setPGs(res.data.data);
         setTotal(res.data.total);
         setPagination(res.data.pagination);
       } catch (err) {
-        console.error('Error fetching PGs:', err);
+        toast.error('Failed to load PGs');
       } finally {
         setLoading(false);
       }
     };
     fetchPGs();
-  }, [filters, searchQuery]);
+  }, [filters, debouncedSearch]);
 
   const handleSearch = (e) => {
     e.preventDefault();

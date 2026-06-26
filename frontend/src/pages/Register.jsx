@@ -26,11 +26,7 @@ const Register = () => {
     setLoading(true);
     try {
       if (registerType === 'phone') {
-        await api.post('/auth/register-phone', {
-          name,
-          phone,
-          password,
-        });
+        await api.post('/auth/register-phone', { name, phone, password });
         toast.success('Account created! You can now sign in.');
         navigate('/login');
       } else {
@@ -105,14 +101,17 @@ const Register = () => {
             {registerType === 'phone' ? (
               <div>
                 <label className="block text-sm font-medium mb-2">Phone Number</label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <div className="relative flex">
+                  <span className="flex items-center px-3 bg-gray-100 dark:bg-gray-700 border border-r-0 border-gray-300 dark:border-gray-600 rounded-l-lg text-sm font-medium text-gray-700 dark:text-gray-300">
+                    +91
+                  </span>
                   <input
                     type="tel"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="input-field pl-10"
-                    placeholder="9876543210"
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    className="input-field rounded-l-none flex-1"
+                    placeholder="98765 43210"
+                    maxLength={10}
                     required
                   />
                 </div>

@@ -15,6 +15,7 @@ const FilterPanel = ({ filters, setFilters, isOpen, setIsOpen }) => {
       sharingType: '',
       minRent: '',
       maxRent: '',
+      collegeNearby: '',
       sort: '-createdAt',
       page: 1,
     });

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Globe, Mail, Phone, Image, ToggleLeft, ToggleRight, MapPin, GraduationCap, Plus, X } from 'lucide-react';
+import { Save, Globe, Mail, Phone, Image, ToggleLeft, ToggleRight, MapPin, GraduationCap, Plus, X, LayoutGrid } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../utils/api';
 
@@ -14,11 +14,14 @@ const Settings = () => {
     maxImagesPerPG: 5,
     areas: [],
     colleges: [],
+    popularAreas: [],
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [newArea, setNewArea] = useState('');
   const [newCollege, setNewCollege] = useState('');
+  const [newPopularArea, setNewPopularArea] = useState('');
+  const [newPopularAreaImage, setNewPopularAreaImage] = useState('');
 
   useEffect(() => { fetchSettings(); }, []);
 
@@ -73,6 +76,54 @@ const Settings = () => {
 
   const removeCollege = (college) => {
     setSettings({ ...settings, colleges: settings.colleges.filter(c => c !== college) });
+  };
+
+  const addPopularArea = () => {
+    const name = newPopularArea.trim();
+    const image = newPopularAreaImage.trim();
+    if (!name) return;
+    if (settings.popularAreas.some(a => a.name === name)) {
+      toast.error('Area already exists');
+      return;
+    }
+    setSettings({ ...settings, popularAreas: [...settings.popularAreas, { name, image }] });
+    setNewPopularArea('');
+    setNewPopularAreaImage('');
+  };
+
+  const removePopularArea = (index) => {
+    setSettings({ ...settings, popularAreas: settings.popularAreas.filter((_, i) => i !== index) });
+  };
+
+  const updatePopularAreaName = (index, name) => {
+    setSettings({
+      ...settings,
+      popularAreas: settings.popularAreas.map((a, i) => i === index ? { ...a, name } : a)
+    });
+  };
+
+  const updatePopularAreaImage = (index, image) => {
+    setSettings({
+      ...settings,
+      popularAreas: settings.popularAreas.map((a, i) => i === index ? { ...a, image } : a)
+    });
+  };
+
+  const handlePopularAreaFile = (index, file) => {
+    if (!file || !file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be under 5MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      updatePopularAreaImage(index, e.target.result);
+      toast.success('Image uploaded');
+    };
+    reader.readAsDataURL(file);
   };
 
   const ToggleSwitch = ({ enabled, onChange, label, description }) => (
@@ -267,6 +318,81 @@ const Settings = () => {
           onRemove={removeCollege}
           placeholder="Add a new college..."
         />
+
+        <div className="card p-6 lg:col-span-2">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <LayoutGrid className="w-5 h-5 text-accent-500" />
+            Popular Areas (Homepage)
+            <span className="ml-auto text-sm font-normal text-gray-500">{settings.popularAreas.length} areas</span>
+          </h2>
+          <div className="flex flex-col sm:flex-row gap-2 mb-4">
+            <input
+              type="text"
+              value={newPopularArea}
+              onChange={(e) => setNewPopularArea(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addPopularArea())}
+              placeholder="Area name"
+              className="input-field flex-1"
+            />
+            <input
+              type="text"
+              value={newPopularAreaImage}
+              onChange={(e) => setNewPopularAreaImage(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addPopularArea())}
+              placeholder="Image URL (optional)"
+              className="input-field flex-1"
+            />
+            <button onClick={addPopularArea} className="btn-primary px-4 flex items-center gap-1 whitespace-nowrap">
+              <Plus className="w-4 h-4" />
+              Add
+            </button>
+          </div>
+          <div className="space-y-3">
+            {settings.popularAreas.map((area, index) => (
+              <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                <div className="relative flex-shrink-0">
+                  <img
+                    src={area.image || 'https://via.placeholder.com/80'}
+                    alt={area.name}
+                    className="w-16 h-16 rounded-lg object-cover"
+                  />
+                  <label className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
+                    <Image className="w-5 h-5 text-white" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handlePopularAreaFile(index, e.target.files[0])}
+                    />
+                  </label>
+                </div>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <input
+                    type="text"
+                    value={area.name}
+                    onChange={(e) => updatePopularAreaName(index, e.target.value)}
+                    className="input-field text-sm font-medium"
+                    placeholder="Area name"
+                  />
+                  <input
+                    type="text"
+                    value={area.image}
+                    onChange={(e) => updatePopularAreaImage(index, e.target.value)}
+                    placeholder="Image URL"
+                    className="input-field text-sm"
+                  />
+                </div>
+                <button onClick={() => removePopularArea(index)} className="flex items-center gap-1 px-3 py-1.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0">
+                  <X className="w-4 h-4" />
+                  Delete
+                </button>
+              </div>
+            ))}
+            {settings.popularAreas.length === 0 && (
+              <p className="text-sm text-gray-400 dark:text-gray-500">No popular areas added yet</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

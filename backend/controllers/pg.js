@@ -1,5 +1,23 @@
 const PG = require('../models/PG');
 const Review = require('../models/Review');
+const Settings = require('../models/Settings');
+
+const PG_FIELDS = [
+  'name', 'description', 'rent', 'deposit', 'gender', 'foodIncluded',
+  'acAvailable', 'sharingType', 'area', 'collegeNearby', 'address',
+  'latitude', 'longitude', 'images', 'videos', 'amenities',
+  'contactNumber', 'contactName', 'featured', 'active'
+];
+
+const sanitizePGInput = (body) => {
+  const sanitized = {};
+  for (const field of PG_FIELDS) {
+    if (body[field] !== undefined) {
+      sanitized[field] = body[field];
+    }
+  }
+  return sanitized;
+};
 
 exports.getPGs = async (req, res, next) => {
   try {
@@ -68,7 +86,8 @@ exports.getPG = async (req, res, next) => {
 
 exports.createPG = async (req, res, next) => {
   try {
-    const pg = await PG.create(req.body);
+    const sanitized = sanitizePGInput(req.body);
+    const pg = await PG.create(sanitized);
     res.status(201).json({ success: true, data: pg });
   } catch (err) {
     next(err);
@@ -77,7 +96,8 @@ exports.createPG = async (req, res, next) => {
 
 exports.updatePG = async (req, res, next) => {
   try {
-    const pg = await PG.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const sanitized = sanitizePGInput(req.body);
+    const pg = await PG.findByIdAndUpdate(req.params.id, sanitized, { new: true, runValidators: true });
     if (!pg) {
       return res.status(404).json({ success: false, message: 'PG not found' });
     }
@@ -156,6 +176,28 @@ exports.getStats = async (req, res, next) => {
         avgRent: avgResult.length > 0 ? Math.round(avgResult[0].avgRent) : 0
       }
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getPopularAreas = async (req, res, next) => {
+  try {
+    let settings = await Settings.findOne();
+    if (!settings || !settings.popularAreas || settings.popularAreas.length === 0) {
+      return res.status(200).json({
+        success: true,
+        data: [
+          { name: 'Surathkal', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400' },
+          { name: 'Hampankatta', image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400' },
+          { name: 'Kadri', image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400' },
+          { name: 'Bejai', image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=400' },
+          { name: 'Kankanady', image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400' },
+          { name: 'Falnir', image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400' }
+        ]
+      });
+    }
+    res.status(200).json({ success: true, data: settings.popularAreas });
   } catch (err) {
     next(err);
   }

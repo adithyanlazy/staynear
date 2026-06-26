@@ -6,56 +6,44 @@ A modern full-stack web application for students to find PG accommodations near 
 
 - **Search System**: Search by college, area, or PG name
 - **Advanced Filters**: Budget, gender, food, AC, sharing type
-- **User Authentication**: JWT-based auth with secure password hashing
+- **User Authentication**: JWT-based auth with email/password or phone/password
 - **Favorites**: Save and manage favorite PGs
 - **Reviews**: Star ratings and written reviews
-- **Admin Panel**: Manage PG listings, reviews, and users
+- **Admin Panel**: Manage PG listings, reviews, users, and site settings
 - **Responsive Design**: Mobile-first with dark mode support
 - **Modern UI**: Glassmorphism, animations, and smooth transitions
-- **No Database Required**: Runs with mock data (no MongoDB needed!)
 
 ## Tech Stack
 
-- **Frontend**: React 18, Vite, Tailwind CSS, React Router
+- **Frontend**: React 18, Vite 5, Tailwind CSS 3, React Router 6, Axios
 - **Backend**: Node.js, Express.js
-- **Data**: In-memory mock data (JSON file)
-- **Authentication**: JWT with bcryptjs
+- **Database**: MongoDB Atlas with Mongoose
+- **Authentication**: JWT (httpOnly cookies + Bearer tokens), bcryptjs
+- **Email**: Nodemailer (Gmail SMTP)
 - **Icons**: Lucide React
 
 ## Prerequisites
 
 - Node.js (v16 or higher)
-- npm or yarn
-
-**Note: MongoDB is NOT required!** The app uses in-memory mock data.
+- MongoDB Atlas account (or local MongoDB)
 
 ## Quick Start
 
-### 1. Install Backend Dependencies
+### 1. Backend Setup
 
 ```bash
 cd backend
+cp .env.example .env   # Configure your environment variables
 npm install
-```
-
-### 2. Install Frontend Dependencies
-
-```bash
-cd ../frontend
-npm install
-```
-
-### 3. Start the Backend
-
-```bash
-cd ../backend
+node seed.js            # Seed sample PG data
 npm run dev
 ```
 
-### 4. Start the Frontend (in a new terminal)
+### 2. Frontend Setup
 
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
 
@@ -63,62 +51,63 @@ The application will be available at:
 - Frontend: http://localhost:5173
 - Backend: http://localhost:5001
 
+## Environment Variables
+
+### Backend (.env)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `MONGODB_URI` | Yes | MongoDB Atlas connection string |
+| `JWT_SECRET` | Yes | Secret key for JWT signing |
+| `CLIENT_URL` | No | Frontend URL for CORS (comma-separated) |
+| `EMAIL_USER` | No | Gmail address for OTP emails |
+| `EMAIL_PASS` | No | Gmail app password |
+| `NODE_ENV` | No | `development` or `production` |
+
+### Frontend
+
+API URL is hardcoded in `src/utils/api.js` for production. Vite proxy handles `/api` -> `localhost:5001` in development.
+
 ## Admin Access
 
 - **Email**: admin@staynear.com
 - **Password**: admin123
-
-Register a new account or use the admin credentials to access the admin panel.
 
 ## Project Structure
 
 ```
 staynear/
 ├── backend/
-│   ├── config/          # Configuration (not used in mock mode)
-│   ├── controllers/     # Route handlers
-│   ├── data/            # Mock data storage
-│   │   ├── mockDb.js    # In-memory database
-│   │   └── pgs.json     # Sample PG data
-│   ├── middleware/       # Auth & error handlers
-│   ├── models/          # (Not used in mock mode)
+│   ├── config/          # MongoDB connection
+│   ├── controllers/     # Route handlers (auth, admin, pg, review)
+│   ├── middleware/       # Auth (JWT + role), error handler
+│   ├── models/          # Mongoose schemas (User, PG, Review, Settings)
 │   ├── routes/          # API routes
-│   ├── seed.js          # (Not needed in mock mode)
+│   ├── utils/           # Email OTP, phone OTP
+│   ├── seed.js          # Database seeder
 │   └── server.js        # Express server
 ├── frontend/
 │   ├── public/          # Static assets
 │   ├── src/
 │   │   ├── components/  # Reusable components
-│   │   ├── context/     # React context
+│   │   │   └── admin/   # Admin-specific components
+│   │   ├── context/     # React context (AuthContext)
 │   │   ├── hooks/       # Custom hooks
 │   │   ├── pages/       # Page components
-│   │   └── utils/       # Utilities & constants
+│   │   │   └── admin/   # Admin panel pages
+│   │   └── utils/       # API config, constants
 │   └── index.html
+├── render.yaml          # Render deployment config
 └── README.md
 ```
-
-## Sample Data
-
-The app comes pre-loaded with 10 sample PGs across Mangalore:
-
-| Name | Area | Gender | Rent |
-|------|------|--------|------|
-| Sunshine Boys Hostel | Surathkal | Boys | ₹8,000 |
-| Green Valley Ladies Hostel | Hampankatta | Girls | ₹7,500 |
-| City Center PG | Mangalore City | Co-Ed | ₹6,000 |
-| AK Residency | Kankanady | Boys | ₹10,000 |
-| Lakshmi Ladies PG | Bejai | Girls | ₹6,500 |
-| Nearby Boys Hostel | Surathkal | Boys | ₹5,500 |
-| Cozy Corners PG | Kadri | Co-Ed | ₹7,000 |
-| Mangalore Homes | Falnir | Co-Ed | ₹8,500 |
-| Students Inn | Kapikad | Boys | ₹5,000 |
-| Rose Garden Ladies PG | Boloor | Girls | ₹7,000 |
 
 ## API Endpoints
 
 ### Auth
-- `POST /api/auth/register` - Register user
-- `POST /api/auth/login` - Login user
+- `POST /api/auth/register` - Register with email
+- `POST /api/auth/register-phone` - Register with phone
+- `POST /api/auth/login` - Login with email
+- `POST /api/auth/login-phone` - Login with phone
 - `GET /api/auth/me` - Get current user
 - `POST /api/auth/favorites/:pgId` - Add favorite
 - `DELETE /api/auth/favorites/:pgId` - Remove favorite
@@ -140,6 +129,14 @@ The app comes pre-loaded with 10 sample PGs across Mangalore:
 - `POST /api/reviews/pg/:pgId` - Add review
 - `PUT /api/reviews/:id` - Update review
 - `DELETE /api/reviews/:id` - Delete review
+
+### Admin
+- `GET /api/admin/stats` - Dashboard statistics
+- `GET /api/admin/users` - List all users
+- `PUT /api/admin/users/:id` - Update user role
+- `DELETE /api/admin/users/:id` - Delete user
+- `GET /api/admin/reviews` - List all reviews
+- `DELETE /api/admin/reviews/:id` - Delete review
 
 ## Features in Detail
 
@@ -168,9 +165,11 @@ The app comes pre-loaded with 10 sample PGs across Mangalore:
 - System preference detection
 - Persistent preference storage
 
-## Data Persistence
+## Deployment
 
-**Note**: This app uses in-memory storage. Data will reset when the server restarts. For production use, integrate with MongoDB or another database.
+- **Frontend**: Vercel (`https://staynear-fine.vercel.app`)
+- **Backend**: Render (`https://staynear-davp.onrender.com`)
+- **Database**: MongoDB Atlas
 
 ## License
 

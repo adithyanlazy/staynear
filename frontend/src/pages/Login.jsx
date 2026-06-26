@@ -5,15 +5,6 @@ import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
 
-const getDeviceId = () => {
-  let deviceId = localStorage.getItem('staynear_device_id');
-  if (!deviceId) {
-    deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('staynear_device_id', deviceId);
-  }
-  return deviceId;
-};
-
 const Login = () => {
   const [loginType, setLoginType] = useState('phone');
   const [phone, setPhone] = useState('');
@@ -29,13 +20,7 @@ const Login = () => {
     setLoading(true);
     try {
       if (loginType === 'phone') {
-        const deviceId = getDeviceId();
-        const res = await api.post('/auth/login-phone', {
-          phone,
-          password,
-          deviceId,
-        });
-
+        const res = await api.post('/auth/login-phone', { phone, password });
         localStorage.setItem('token', res.data.token);
         api.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
         await loadUser();
@@ -107,14 +92,17 @@ const Login = () => {
             {loginType === 'phone' ? (
               <div>
                 <label className="block text-sm font-medium mb-2">Phone Number</label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <div className="relative flex">
+                  <span className="flex items-center px-3 bg-gray-100 dark:bg-gray-700 border border-r-0 border-gray-300 dark:border-gray-600 rounded-l-lg text-sm font-medium text-gray-700 dark:text-gray-300">
+                    +91
+                  </span>
                   <input
                     type="tel"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="input-field pl-10"
-                    placeholder="9876543210"
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    className="input-field rounded-l-none flex-1"
+                    placeholder="98765 43210"
+                    maxLength={10}
                     required
                   />
                 </div>

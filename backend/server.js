@@ -20,6 +20,18 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { success: false, message: 'Too many attempts. Please try again later.' }
+});
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/login-phone', authLimiter);
+app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/register-phone', authLimiter);
+app.use('/api/auth/verify-email', authLimiter);
+app.use('/api/auth/resend-verification', authLimiter);
+
 app.use(cors({
   origin: function(origin, callback) {
     const allowed = (process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',') : ['http://localhost:5173']);
@@ -70,6 +82,10 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5001;
 
 const start = async () => {
+  if (!process.env.JWT_SECRET) {
+    console.error('FATAL: JWT_SECRET environment variable is not set. Server cannot start.');
+    process.exit(1);
+  }
   await connectDB();
   app.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);

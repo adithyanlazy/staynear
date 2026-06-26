@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { MapPin, Star, Heart, Wifi, Utensils, Snowflake, Users } from 'lucide-react';
+import { MapPin, Star, Heart, Utensils, Snowflake, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
-const PGCard = ({ pg }) => {
+const PGCard = ({ pg, onRemoveFavorite }) => {
   const { user, addFavorite, removeFavorite } = useAuth();
   const isFavorite = user?.favorites?.some(fav => (typeof fav === 'object' ? fav.pgId : fav) === pg._id);
 
@@ -18,6 +18,7 @@ const PGCard = ({ pg }) => {
       if (isFavorite) {
         await removeFavorite(pg._id);
         toast.success('Removed from favorites');
+        if (onRemoveFavorite) onRemoveFavorite(pg._id);
       } else {
         await addFavorite(pg._id);
         toast.success('Added to favorites');
@@ -39,6 +40,7 @@ const PGCard = ({ pg }) => {
         </div>
         <button
           onClick={handleFavorite}
+          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
           className={`absolute top-3 right-3 p-2 rounded-full transition-all ${
             isFavorite
               ? 'bg-red-500 text-white'
@@ -96,10 +98,11 @@ const PGCard = ({ pg }) => {
             <Users className="w-4 h-4" />
             {pg.sharingType} sharing
           </span>
-          <span className="flex items-center gap-1">
-            <Wifi className="w-4 h-4" />
-            WiFi
-          </span>
+          {pg.amenities?.includes('WiFi') && (
+            <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+              WiFi
+            </span>
+          )}
         </div>
 
         <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">

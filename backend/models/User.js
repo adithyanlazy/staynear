@@ -51,9 +51,6 @@ const UserSchema = new mongoose.Schema({
   },
   verificationOTP: String,
   verificationOTPExpiry: Date,
-  phoneOTP: String,
-  phoneOTPExpiry: Date,
-  verifiedDevices: [String],
   lastLogin: Date,
   loginCount: {
     type: Number,
@@ -74,7 +71,7 @@ const UserSchema = new mongoose.Schema({
 });
 
 UserSchema.pre('save', async function () {
-  if (!this.isModified('password')) {
+  if (!this.isModified('password') || !this.password) {
     return;
   }
   const salt = await bcrypt.genSalt(10);
@@ -88,6 +85,7 @@ UserSchema.methods.getSignedJwtToken = function () {
 };
 
 UserSchema.methods.matchPassword = async function (enteredPassword) {
+  if (!this.password) return false;
   return await bcrypt.compare(enteredPassword, this.password);
 };
 

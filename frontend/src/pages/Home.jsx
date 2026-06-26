@@ -10,6 +10,7 @@ import api from '../utils/api';
 const Home = () => {
   const [featuredPGs, setFeaturedPGs] = useState([]);
   const [stats, setStats] = useState(null);
+  const [popularAreas, setPopularAreas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [heroRef, heroVisible] = useScrollAnimation();
@@ -20,12 +21,14 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [pgsRes, statsRes] = await Promise.all([
+        const [pgsRes, statsRes, areasRes] = await Promise.all([
           api.get('/pgs/featured'),
           api.get('/pgs/stats'),
+          api.get('/pgs/popular-areas'),
         ]);
         setFeaturedPGs(pgsRes.data.data);
         setStats(statsRes.data.data);
+        setPopularAreas(areasRes.data.data);
       } catch (err) {
         console.error('Error fetching data:', err);
       } finally {
@@ -34,15 +37,6 @@ const Home = () => {
     };
     fetchData();
   }, []);
-
-  const popularAreas = [
-    { name: 'Surathkal', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400', count: 25 },
-    { name: 'Hampankatta', image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400', count: 18 },
-    { name: 'Kadri', image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400', count: 15 },
-    { name: 'Bejai', image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=400', count: 12 },
-    { name: 'Kankanady', image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400', count: 20 },
-    { name: 'Falnir', image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400', count: 14 },
-  ];
 
   const colleges = [
     'NITK Surathkal', 'St Aloysius College', 'Yenepoya University',
@@ -183,7 +177,7 @@ const Home = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-4">
                   <h3 className="text-white font-semibold">{area.name}</h3>
-                  <p className="text-white/70 text-sm">{area.count} PGs</p>
+                  <p className="text-white/70 text-sm">Explore PGs</p>
                 </div>
               </Link>
             ))}
