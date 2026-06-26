@@ -86,9 +86,11 @@ const Home = () => {
             </p>
           </div>
 
-          <SearchBar />
+          <div className="relative z-10">
+            <SearchBar />
+          </div>
 
-          <div className="flex justify-center mt-6">
+          <div className="flex justify-center mt-6 relative z-0">
             <Link to="/pgs" className="btn-primary inline-flex items-center gap-2">
               View All PGs
               <ArrowRight className="w-5 h-5" />
