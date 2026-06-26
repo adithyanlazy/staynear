@@ -191,7 +191,18 @@ exports.updateSettings = async (req, res, next) => {
     if (!settings) {
       settings = await Settings.create(req.body);
     } else {
-      settings = await Settings.findByIdAndUpdate(settings._id, req.body, { new: true });
+      const { areas, colleges, popularAreas, siteName, siteDescription, contactEmail, contactPhone, maintenanceMode, allowRegistrations, maxImagesPerPG } = req.body;
+      if (areas !== undefined) settings.areas = areas;
+      if (colleges !== undefined) settings.colleges = colleges;
+      if (popularAreas !== undefined) settings.popularAreas = popularAreas;
+      if (siteName !== undefined) settings.siteName = siteName;
+      if (siteDescription !== undefined) settings.siteDescription = siteDescription;
+      if (contactEmail !== undefined) settings.contactEmail = contactEmail;
+      if (contactPhone !== undefined) settings.contactPhone = contactPhone;
+      if (maintenanceMode !== undefined) settings.maintenanceMode = maintenanceMode;
+      if (allowRegistrations !== undefined) settings.allowRegistrations = allowRegistrations;
+      if (maxImagesPerPG !== undefined) settings.maxImagesPerPG = maxImagesPerPG;
+      await settings.save();
     }
     res.status(200).json({ success: true, data: settings });
   } catch (err) {
