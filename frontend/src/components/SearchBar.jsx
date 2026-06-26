@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, MapPin, GraduationCap, IndianRupee } from 'lucide-react';
 import api from '../utils/api';
 import { COLLEGES, AREAS } from '../utils/constants';
@@ -13,6 +13,7 @@ const SearchBar = ({ variant = 'hero' }) => {
   const [colleges, setColleges] = useState(COLLEGES);
   const [areas, setAreas] = useState(AREAS);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -25,7 +26,7 @@ const SearchBar = ({ variant = 'hero' }) => {
       }
     };
     fetchSuggestions();
-  }, []);
+  }, [location.pathname]);
 
   const items = searchType === 'college' ? colleges : areas;
   const filteredItems = items.filter(item =>
