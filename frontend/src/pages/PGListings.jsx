@@ -188,12 +188,14 @@ const PGListings = () => {
         </div>
       </div>
 
-      <FilterPanel
-        filters={filters}
-        setFilters={setFilters}
-        isOpen={filterOpen}
-        setIsOpen={setFilterOpen}
-      />
+      <div className="lg:hidden">
+        <FilterPanel
+          filters={filters}
+          setFilters={setFilters}
+          isOpen={filterOpen}
+          setIsOpen={setFilterOpen}
+        />
+      </div>
     </div>
   );
 };
