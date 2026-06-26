@@ -88,6 +88,12 @@ const Home = () => {
 
           <SearchBar />
 
+          <div className="flex justify-center mt-6">
+            <Link to="/pgs" className="btn-secondary flex items-center gap-2">
+              View All PGs
+            </Link>
+          </div>
+
           <div className="flex flex-wrap justify-center gap-4 mt-8">
             <span className="text-sm text-gray-500 dark:text-gray-400">Popular:</span>
             {colleges.slice(0, 4).map(college => (
