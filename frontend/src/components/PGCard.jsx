@@ -6,8 +6,10 @@ import toast from 'react-hot-toast';
 const PGCard = ({ pg, onRemoveFavorite }) => {
   const { user, addFavorite, removeFavorite } = useAuth();
   const isFavorite = user?.favorites?.some(fav => {
-    const id = typeof fav === 'object' ? (fav.pgId?._id || fav.pgId) : fav;
-    return id === pg._id;
+    if (typeof fav === 'object') {
+      return (fav.pgId?._id || fav.pgId || fav._id) === pg._id;
+    }
+    return fav === pg._id;
   });
 
   const handleFavorite = async (e) => {
