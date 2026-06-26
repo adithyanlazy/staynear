@@ -26,13 +26,13 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="space-y-4 sm:space-y-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="card p-6 animate-pulse">
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-4"></div>
-              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+            <div key={i} className="card p-3 sm:p-6 animate-pulse">
+              <div className="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded w-16 sm:w-24 mb-3 sm:mb-4"></div>
+              <div className="h-5 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded w-12 sm:w-16 mb-2"></div>
+              <div className="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded w-14 sm:w-20"></div>
             </div>
           ))}
         </div>
@@ -41,43 +41,43 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-bold text-gray-900 dark:text-white">Dashboard</h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">Overview of your platform</p>
+        <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Overview of your platform</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <StatsCard icon={Building2} label="Total PGs" value={stats?.totalPGs || 0} color="primary" />
         <StatsCard icon={Users} label="Total Users" value={stats?.totalUsers || 0} color="secondary" />
         <StatsCard icon={MessageSquare} label="Total Reviews" value={stats?.totalReviews || 0} color="accent" />
         <StatsCard icon={Star} label="Avg Rent" value={`₹${(stats?.avgRent || 0).toLocaleString()}`} color="green" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 card p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent PGs</h2>
-            <Link to="/admin/pgs" className="text-sm text-primary-500 hover:text-primary-600 flex items-center gap-1">
-              View All <ArrowRight className="w-4 h-4" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="lg:col-span-2 card p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Recent PGs</h2>
+            <Link to="/admin/pgs" className="text-xs sm:text-sm text-primary-500 hover:text-primary-600 flex items-center gap-1">
+              View All <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
             </Link>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {stats?.recentPGs?.length > 0 ? (
               stats.recentPGs.map((pg) => (
-                <div key={pg._id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <div key={pg._id} className="flex items-center gap-3 sm:gap-4 p-2 sm:p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                   <img
                     src={pg.images?.[0] || 'https://via.placeholder.com/48'}
                     alt={pg.name}
-                    className="w-12 h-12 rounded-lg object-cover"
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 dark:text-white truncate">{pg.name}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{pg.area}</p>
+                    <p className="font-medium text-gray-900 dark:text-white truncate text-sm">{pg.name}</p>
+                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{pg.area}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-900 dark:text-white">₹{pg.rent?.toLocaleString()}</p>
-                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                  <div className="text-right flex-shrink-0">
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">₹{pg.rent?.toLocaleString()}</p>
+                    <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-500">
                       <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                       {pg.rating?.toFixed(1) || 'N/A'}
                     </div>
@@ -90,17 +90,17 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="card p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Reviews</h2>
-            <Link to="/admin/reviews" className="text-sm text-primary-500 hover:text-primary-600 flex items-center gap-1">
-              View All <ArrowRight className="w-4 h-4" />
+        <div className="card p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Recent Reviews</h2>
+            <Link to="/admin/reviews" className="text-xs sm:text-sm text-primary-500 hover:text-primary-600 flex items-center gap-1">
+              View All <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
             </Link>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {stats?.recentReviews?.length > 0 ? (
               stats.recentReviews.map((review) => (
-                <div key={review._id} className="p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <div key={review._id} className="p-2 sm:p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                   <div className="flex items-center gap-1 mb-1">
                     {[...Array(5)].map((_, i) => (
                       <Star
@@ -122,7 +122,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
         <div className="card p-6">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Active PGs</h3>
           <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats?.activePGs || 0}</p>

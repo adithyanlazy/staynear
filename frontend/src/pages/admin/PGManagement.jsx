@@ -413,19 +413,26 @@ const PGManagement = () => {
     setFormData(prev => ({ ...prev, videos: newVideos }));
   };
 
+  const genderBadge = (gender) => {
+    const base = 'px-2 py-1 rounded-full text-xs font-medium';
+    if (gender === 'boys') return `${base} bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400`;
+    if (gender === 'girls') return `${base} bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400`;
+    return `${base} bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400`;
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-display font-bold text-gray-900 dark:text-white">PG Management</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">{filteredPGs.length} listings found</p>
+          <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-900 dark:text-white">PG Management</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">{filteredPGs.length} listings found</p>
         </div>
-        <button onClick={() => handleOpenModal()} className="btn-primary flex items-center gap-2">
+        <button onClick={() => handleOpenModal()} className="btn-primary flex items-center gap-2 w-full sm:w-auto justify-center">
           <Plus className="w-5 h-5" /> Add PG
         </button>
       </div>
 
-      <div className="card p-4">
+      <div className="card p-3 sm:p-4">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -453,92 +460,132 @@ const PGManagement = () => {
           <div className="animate-spin rounded-full h-8 w-8 border-4 border-primary-500 border-t-transparent mx-auto"></div>
         </div>
       ) : (
-        <div className="card overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Area</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rent</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Gender</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rating</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredPGs.length > 0 ? filteredPGs.map(pg => (
-                  <tr key={pg._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <img src={pg.images?.[0] || 'https://via.placeholder.com/40'} alt="" className="w-10 h-10 rounded-lg object-cover" />
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">{pg.name}</p>
-                          {pg.featured && <span className="text-xs bg-accent-100 text-accent-700 px-2 py-0.5 rounded-full">Featured</span>}
+        <>
+          <div className="hidden md:block card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Area</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rent</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Gender</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rating</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {filteredPGs.length > 0 ? filteredPGs.map(pg => (
+                    <tr key={pg._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <img src={pg.images?.[0] || 'https://via.placeholder.com/40'} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{pg.name}</p>
+                            {pg.featured && <span className="text-xs bg-accent-100 text-accent-700 px-2 py-0.5 rounded-full">Featured</span>}
+                          </div>
                         </div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-500 dark:text-gray-400 text-sm">{pg.area}</td>
+                      <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">₹{pg.rent?.toLocaleString()}</td>
+                      <td className="px-6 py-4">
+                        <span className={genderBadge(pg.gender)}>
+                          {pg.gender === 'co-ed' ? 'Co-Ed' : pg.gender}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1 text-sm">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-gray-600 dark:text-gray-400">{pg.rating?.toFixed(1) || 'N/A'}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${pg.active ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}`}>
+                          {pg.active ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-end gap-2">
+                          <button onClick={() => handleOpenModal(pg)} className="p-2 text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => setDeleteId(pg._id)} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan="7" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">No PGs found</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="md:hidden space-y-3">
+            {filteredPGs.length > 0 ? filteredPGs.map(pg => (
+              <div key={pg._id} className="card p-4">
+                <div className="flex gap-3">
+                  <img src={pg.images?.[0] || 'https://via.placeholder.com/56'} alt="" className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-900 dark:text-white truncate">{pg.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{pg.area}</p>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-500 dark:text-gray-400 text-sm">{pg.area}</td>
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">₹{pg.rent?.toLocaleString()}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        pg.gender === 'boys' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                        pg.gender === 'girls' ? 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400' :
-                        'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                      }`}>
-                        {pg.gender === 'co-ed' ? 'Co-Ed' : pg.gender}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1 text-sm">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-gray-600 dark:text-gray-400">{pg.rating?.toFixed(1) || 'N/A'}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${pg.active ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}`}>
-                        {pg.active ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => handleOpenModal(pg)} className="p-2 text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button onClick={() => handleOpenModal(pg)} className="p-1.5 text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button onClick={() => setDeleteId(pg._id)} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                        <button onClick={() => setDeleteId(pg._id)} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                    </td>
-                  </tr>
-                )) : (
-                  <tr>
-                    <td colSpan="7" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">No PGs found</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      <span className="font-semibold text-sm text-gray-900 dark:text-white">₹{pg.rent?.toLocaleString()}</span>
+                      <span className={genderBadge(pg.gender)}>
+                        {pg.gender === 'co-ed' ? 'Co-Ed' : pg.gender}
+                      </span>
+                      <span className="flex items-center gap-0.5 text-xs text-gray-500">
+                        <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                        {pg.rating?.toFixed(1) || 'N/A'}
+                      </span>
+                      {pg.featured && <span className="text-xs bg-accent-100 text-accent-700 px-2 py-0.5 rounded-full">Featured</span>}
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${pg.active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
+                        {pg.active ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <div className="card p-8 text-center text-gray-500 dark:text-gray-400">No PGs found</div>
+            )}
           </div>
-        </div>
+        </>
       )}
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between z-10">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{editingPG ? 'Edit PG' : 'Add New PG'}</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">{editingPG ? 'Edit PG' : 'Add New PG'}</h2>
               <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
                   <label className="block text-sm font-medium mb-1">PG Name</label>
                   <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="input-field" required />
                 </div>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                   <label className="block text-sm font-medium mb-1">Description</label>
                   <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="input-field" rows={3} required />
                 </div>
@@ -572,7 +619,7 @@ const PGManagement = () => {
                   <label className="block text-sm font-medium mb-1">Contact Number</label>
                   <input type="text" value={formData.contactNumber} onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })} className="input-field" required />
                 </div>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                   <label className="block text-sm font-medium mb-1">Address</label>
                   <input type="text" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} className="input-field" required />
                 </div>
@@ -586,7 +633,7 @@ const PGManagement = () => {
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-4">
                 {[
                   { key: 'foodIncluded', label: 'Food Included' },
                   { key: 'acAvailable', label: 'AC Available' },
@@ -642,7 +689,7 @@ const PGManagement = () => {
                       onDragEnter={handleFileDragEnter}
                       onDragLeave={handleFileDragLeave}
                       onDragOver={handleFileDragOver}
-                      className={`border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer ${
+                      className={`border-2 border-dashed rounded-xl p-4 sm:p-6 text-center transition-all cursor-pointer ${
                         isDraggingFiles
                           ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                           : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
@@ -657,7 +704,7 @@ const PGManagement = () => {
                         onChange={handleFileSelect}
                         className="hidden"
                       />
-                      <UploadCloud className={`w-10 h-10 mx-auto mb-2 ${isDraggingFiles ? 'text-primary-500' : 'text-gray-300 dark:text-gray-600'}`} />
+                      <UploadCloud className={`w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 ${isDraggingFiles ? 'text-primary-500' : 'text-gray-300 dark:text-gray-600'}`} />
                       <p className={`text-sm font-medium ${isDraggingFiles ? 'text-primary-600 dark:text-primary-400' : 'text-gray-600 dark:text-gray-400'}`}>
                         {isDraggingFiles ? 'Drop images here' : 'Drag & drop images here, or click to browse'}
                       </p>
@@ -688,7 +735,7 @@ const PGManagement = () => {
                         <p className="text-xs text-gray-400 flex items-center gap-1">
                           <GripVertical className="w-3 h-3" /> Drag to reorder or use arrow buttons. First image is the cover.
                         </p>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                           {formData.images.map((url, index) => (
                             <div
                               key={index}
@@ -753,7 +800,7 @@ const PGManagement = () => {
                       onDragEnter={handleVideoFileDragEnter}
                       onDragLeave={handleVideoFileDragLeave}
                       onDragOver={handleVideoFileDragOver}
-                      className={`border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer ${
+                      className={`border-2 border-dashed rounded-xl p-4 sm:p-6 text-center transition-all cursor-pointer ${
                         isDraggingVideos
                           ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                           : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
@@ -768,7 +815,7 @@ const PGManagement = () => {
                         onChange={handleVideoFileSelect}
                         className="hidden"
                       />
-                      <UploadCloud className={`w-10 h-10 mx-auto mb-2 ${isDraggingVideos ? 'text-primary-500' : 'text-gray-300 dark:text-gray-600'}`} />
+                      <UploadCloud className={`w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 ${isDraggingVideos ? 'text-primary-500' : 'text-gray-300 dark:text-gray-600'}`} />
                       <p className={`text-sm font-medium ${isDraggingVideos ? 'text-primary-600 dark:text-primary-400' : 'text-gray-600 dark:text-gray-400'}`}>
                         {isDraggingVideos ? 'Drop videos here' : 'Drag & drop video files here, or click to browse'}
                       </p>

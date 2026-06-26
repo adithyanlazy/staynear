@@ -194,19 +194,19 @@ const Settings = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-display font-bold text-gray-900 dark:text-white">Website Settings</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Configure your platform settings</p>
+          <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-900 dark:text-white">Website Settings</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Configure your platform settings</p>
         </div>
-        <button onClick={handleSave} disabled={saving} className="btn-primary flex items-center gap-2">
+        <button onClick={handleSave} disabled={saving} className="btn-primary flex items-center gap-2 w-full sm:w-auto justify-center">
           <Save className="w-4 h-4" />
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <div className="card p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <Globe className="w-5 h-5 text-primary-500" />
