@@ -38,6 +38,25 @@ app.use('/api/pgs', require('./routes/pg'));
 app.use('/api/reviews', require('./routes/review'));
 app.use('/api/admin', require('./routes/admin'));
 
+const PG = require('./models/PG');
+const User = require('./models/User');
+const samplePGs = require('./seedData');
+
+app.get('/api/seed', async (req, res) => {
+  try {
+    await PG.deleteMany({});
+    await User.deleteMany({});
+    const adminUser = await User.create({
+      name: 'Admin', email: 'admin@staynear.com', password: 'admin123',
+      role: 'admin', emailVerified: true
+    });
+    const pgs = await PG.insertMany(samplePGs);
+    res.json({ success: true, message: `Seeded ${pgs.length} PGs and admin user` });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
