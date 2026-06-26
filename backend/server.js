@@ -20,6 +20,7 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => req.headers['x-forwarded-for'] || req.ip,
+  message: { success: false, message: 'Too many requests. Please wait a few minutes.' },
 });
 app.use('/api', limiter);
 

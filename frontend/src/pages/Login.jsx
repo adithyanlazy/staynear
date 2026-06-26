@@ -41,7 +41,11 @@ const Login = () => {
         }
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Login failed');
+      if (err.response?.status === 429) {
+        toast.error('Too many attempts. Please wait a few minutes and try again.');
+      } else {
+        toast.error(err.response?.data?.message || 'Login failed');
+      }
     } finally {
       setLoading(false);
     }
