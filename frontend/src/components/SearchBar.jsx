@@ -103,7 +103,7 @@ const SearchBar = ({ variant = 'hero' }) => {
             className="input-field pl-10"
           />
           {showDropdown && filteredItems.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-60 overflow-auto">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-72 overflow-auto pb-2">
               {filteredItems.map((item) => (
                 <button
                   key={item}
@@ -192,7 +192,7 @@ const SearchBar = ({ variant = 'hero' }) => {
               className="w-full pl-12 pr-4 py-4 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 outline-none"
             />
             {showDropdown && filteredItems.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-60 overflow-auto">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-72 overflow-auto pb-2">
                 {filteredItems.map((item) => (
                   <button
                     key={item}
