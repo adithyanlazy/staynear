@@ -162,7 +162,10 @@ exports.getSimilarPGs = async (req, res, next) => {
 exports.getStats = async (req, res, next) => {
   try {
     const totalPGs = await PG.countDocuments({ active: true });
-    const areas = await PG.distinct('area', { active: true });
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = await Settings.create({});
+    }
     const avgResult = await PG.aggregate([
       { $match: { active: true } },
       { $group: { _id: null, avgRent: { $avg: '$rent' } } }
@@ -172,7 +175,7 @@ exports.getStats = async (req, res, next) => {
       success: true,
       data: {
         totalPGs,
-        totalAreas: areas.length,
+        totalAreas: settings.areas.length,
         avgRent: avgResult.length > 0 ? Math.round(avgResult[0].avgRent) : 0
       }
     });
