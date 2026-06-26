@@ -323,7 +323,7 @@ exports.updateProfile = async (req, res, next) => {
   }
 };
 
-exports.addFavorite = async (req, res, next) => {
+exports.addFavorite = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
@@ -336,11 +336,11 @@ exports.addFavorite = async (req, res, next) => {
     }
     res.status(200).json({ success: true, data: user.favorites });
   } catch (err) {
-    next(err);
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
-exports.removeFavorite = async (req, res, next) => {
+exports.removeFavorite = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
@@ -350,11 +350,11 @@ exports.removeFavorite = async (req, res, next) => {
     await user.save();
     res.status(200).json({ success: true, data: user.favorites });
   } catch (err) {
-    next(err);
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
-exports.getFavorites = async (req, res, next) => {
+exports.getFavorites = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate('favorites.pgId');
     if (!user) {
@@ -365,7 +365,7 @@ exports.getFavorites = async (req, res, next) => {
       .map(fav => ({ ...fav.pgId.toObject(), favoritedAt: fav.favoritedAt }));
     res.status(200).json({ success: true, data: favorites });
   } catch (err) {
-    next(err);
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
