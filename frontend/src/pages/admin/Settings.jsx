@@ -28,7 +28,14 @@ const Settings = () => {
   const fetchSettings = async () => {
     try {
       const res = await api.get('/admin/settings');
-      setSettings(res.data.data);
+      const data = res.data.data;
+      setSettings({
+        ...settings,
+        ...data,
+        areas: data.areas || [],
+        colleges: data.colleges || [],
+        popularAreas: data.popularAreas || [],
+      });
     } catch (err) {
       toast.error('Failed to load settings');
     } finally {
@@ -39,7 +46,19 @@ const Settings = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await api.put('/admin/settings', settings);
+      const payload = {
+        siteName: settings.siteName,
+        siteDescription: settings.siteDescription,
+        contactEmail: settings.contactEmail,
+        contactPhone: settings.contactPhone,
+        maintenanceMode: settings.maintenanceMode,
+        allowRegistrations: settings.allowRegistrations,
+        maxImagesPerPG: settings.maxImagesPerPG,
+        areas: settings.areas || [],
+        colleges: settings.colleges || [],
+        popularAreas: settings.popularAreas || [],
+      };
+      await api.put('/admin/settings', payload);
       toast.success('Settings saved successfully');
     } catch (err) {
       toast.error('Failed to save settings');
@@ -51,62 +70,62 @@ const Settings = () => {
   const addArea = () => {
     const val = newArea.trim();
     if (!val) return;
-    if (settings.areas.includes(val)) {
+    if (settings.areas?.includes(val)) {
       toast.error('Area already exists');
       return;
     }
-    setSettings({ ...settings, areas: [...settings.areas, val] });
+    setSettings(prev => ({ ...prev, areas: [...(prev.areas || []), val] }));
     setNewArea('');
   };
 
   const removeArea = (area) => {
-    setSettings({ ...settings, areas: settings.areas.filter(a => a !== area) });
+    setSettings(prev => ({ ...prev, areas: (prev.areas || []).filter(a => a !== area) }));
   };
 
   const addCollege = () => {
     const val = newCollege.trim();
     if (!val) return;
-    if (settings.colleges.includes(val)) {
+    if (settings.colleges?.includes(val)) {
       toast.error('College already exists');
       return;
     }
-    setSettings({ ...settings, colleges: [...settings.colleges, val] });
+    setSettings(prev => ({ ...prev, colleges: [...(prev.colleges || []), val] }));
     setNewCollege('');
   };
 
   const removeCollege = (college) => {
-    setSettings({ ...settings, colleges: settings.colleges.filter(c => c !== college) });
+    setSettings(prev => ({ ...prev, colleges: (prev.colleges || []).filter(c => c !== college) }));
   };
 
   const addPopularArea = () => {
     const name = newPopularArea.trim();
     const image = newPopularAreaImage.trim();
     if (!name) return;
-    if (settings.popularAreas.some(a => a.name === name)) {
+    if (settings.popularAreas?.some(a => a.name === name)) {
       toast.error('Area already exists');
       return;
     }
-    setSettings({ ...settings, popularAreas: [...settings.popularAreas, { name, image }] });
+    setSettings(prev => ({ ...prev, popularAreas: [...(prev.popularAreas || []), { name, image }] }));
     setNewPopularArea('');
     setNewPopularAreaImage('');
   };
 
   const removePopularArea = (index) => {
-    setSettings({ ...settings, popularAreas: settings.popularAreas.filter((_, i) => i !== index) });
+    setSettings(prev => ({ ...prev, popularAreas: (prev.popularAreas || []).filter((_, i) => i !== index) }));
   };
 
   const updatePopularAreaName = (index, name) => {
-    setSettings({
-      ...settings,
-      popularAreas: settings.popularAreas.map((a, i) => i === index ? { ...a, name } : a)
-    });
+    setSettings(prev => ({
+      ...prev,
+      popularAreas: (prev.popularAreas || []).map((a, i) => i === index ? { ...a, name } : a)
+    }));
   };
 
   const updatePopularAreaImage = (index, image) => {
-    setSettings({
-      ...settings,
-      popularAreas: settings.popularAreas.map((a, i) => i === index ? { ...a, image } : a)
-    });
+    setSettings(prev => ({
+      ...prev,
+      popularAreas: (prev.popularAreas || []).map((a, i) => i === index ? { ...a, image } : a)
+    }));
   };
 
   const handlePopularAreaFile = (index, file) => {
