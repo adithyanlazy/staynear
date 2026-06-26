@@ -69,7 +69,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
-      <section ref={heroRef} className={`relative pt-24 pb-16 md:pt-32 md:pb-24 animate-on-scroll ${heroVisible ? 'visible' : ''}`}>
+      <section ref={heroRef} className={`relative pt-24 pb-64 md:pt-32 md:pb-64 animate-on-scroll ${heroVisible ? 'visible' : ''}`}>
         <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900" />
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary-300/30 dark:bg-primary-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-secondary-300/30 dark:bg-secondary-500/10 rounded-full blur-3xl" />
