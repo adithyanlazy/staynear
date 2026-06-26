@@ -13,28 +13,48 @@ exports.register = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
-    const otp = crypto.randomInt(100000, 999999).toString();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+    const emailConfigured = process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD
+      && process.env.GMAIL_USER !== 'your_gmail@gmail.com';
 
-    const user = await User.create({
-      name,
-      email,
-      password,
-      role: 'user',
-      favorites: [],
-      emailVerified: false,
-      verificationOTP: otp,
-      verificationOTPExpiry: otpExpiry,
-    });
+    let user;
+    let requiresVerification = false;
 
-    await sendEmailOTP(email, otp);
+    if (emailConfigured) {
+      const otp = crypto.randomInt(100000, 999999).toString();
+      const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+      user = await User.create({
+        name,
+        email,
+        password,
+        role: 'user',
+        favorites: [],
+        emailVerified: false,
+        verificationOTP: otp,
+        verificationOTPExpiry: otpExpiry,
+      });
+
+      await sendEmailOTP(email, otp);
+      requiresVerification = true;
+    } else {
+      user = await User.create({
+        name,
+        email,
+        password,
+        role: 'user',
+        favorites: [],
+        emailVerified: true,
+      });
+    }
 
     console.log(`New user registered: ${email}`);
 
     res.status(201).json({
       success: true,
-      message: 'Registration successful. Please verify your email.',
-      requiresVerification: true,
+      message: requiresVerification
+        ? 'Registration successful. Please verify your email.'
+        : 'Registration successful.',
+      requiresVerification,
       email,
     });
   } catch (err) {
