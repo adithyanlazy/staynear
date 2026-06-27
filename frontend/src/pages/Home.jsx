@@ -16,8 +16,11 @@ const Home = () => {
 
   const [heroRef, heroVisible] = useScrollAnimation();
   const [statsRef, statsVisible] = useScrollAnimation();
+  const [featuredRef, featuredVisible] = useScrollAnimation();
   const [areasRef, areasVisible] = useScrollAnimation();
   const [featuresRef, featuresVisible] = useScrollAnimation();
+  const [testimonialsRef, testimonialsVisible] = useScrollAnimation();
+  const [ctaRef, ctaVisible] = useScrollAnimation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -113,7 +116,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-16 md:py-24">
+      <section ref={featuredRef} className={`py-16 md:py-24 animate-on-scroll ${featuredVisible ? 'visible' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="section-title">Featured PGs</h2>
@@ -211,7 +214,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-16 md:py-24 bg-white dark:bg-gray-800">
+      <section ref={testimonialsRef} className={`py-16 md:py-24 bg-white dark:bg-gray-800 animate-on-scroll ${testimonialsVisible ? 'visible' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="section-title">What Students Say</h2>
@@ -247,7 +250,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-16 md:py-24">
+      <section ref={ctaRef} className={`py-16 md:py-24 animate-on-scroll ${ctaVisible ? 'visible' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative bg-gradient-to-r from-primary-500 to-secondary-500 rounded-3xl p-8 md:p-16 overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
