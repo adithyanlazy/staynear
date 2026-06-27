@@ -8,9 +8,7 @@ const AuthGate = () => {
         <header className="px-4 py-6">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
-                <Home className="w-5 h-5 text-white" />
-              </div>
+              <img src="/logo-icon.svg" alt="StayNear" className="w-10 h-10" />
               <span className="text-xl font-display font-bold text-gray-900 dark:text-white">StayNear</span>
             </div>
             <div className="flex items-center gap-3">
@@ -33,9 +31,7 @@ const AuthGate = () => {
         <main className="flex-1 flex items-center justify-center px-4 pb-16">
           <div className="max-w-4xl mx-auto text-center">
             <div className="mb-8">
-              <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <Home className="w-10 h-10 text-white" />
-              </div>
+              <img src="/logo-icon.svg" alt="StayNear" className="w-20 h-20 mx-auto mb-6" />
               <h1 className="text-4xl md:text-5xl font-display font-bold text-gray-900 dark:text-white mb-4">
                 Find Your Perfect
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500"> PG Home</span>
