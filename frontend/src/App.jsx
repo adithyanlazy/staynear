@@ -1,34 +1,38 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import AuthGate from './components/AuthGate';
-import Home from './pages/Home';
-import PGListings from './pages/PGListings';
-import PGDetails from './pages/PGDetails';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import VerifyEmail from './pages/VerifyEmail';
-import Favorites from './pages/Favorites';
-import NotFound from './pages/NotFound';
 import PrivateRoute from './components/PrivateRoute';
 import AdminLayout from './components/admin/AdminLayout';
-import AdminDashboard from './pages/admin/Dashboard';
-import PGManagement from './pages/admin/PGManagement';
-import UserManagement from './pages/admin/UserManagement';
-import ReviewModeration from './pages/admin/ReviewModeration';
-import Settings from './pages/admin/Settings';
+
+const Home = lazy(() => import('./pages/Home'));
+const PGListings = lazy(() => import('./pages/PGListings'));
+const PGDetails = lazy(() => import('./pages/PGDetails'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
+const Favorites = lazy(() => import('./pages/Favorites'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
+const PGManagement = lazy(() => import('./pages/admin/PGManagement'));
+const UserManagement = lazy(() => import('./pages/admin/UserManagement'));
+const ReviewModeration = lazy(() => import('./pages/admin/ReviewModeration'));
+const Settings = lazy(() => import('./pages/admin/Settings'));
+
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent"></div>
+  </div>
+);
 
 const AppContent = () => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent"></div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!user) {
@@ -39,21 +43,23 @@ const AppContent = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/pgs" element={<PGListings />} />
-          <Route path="/pg/:id" element={<PGDetails />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route
-            path="/favorites"
-            element={
-              <PrivateRoute>
-                <Favorites />
-              </PrivateRoute>
-            }
-          />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/pgs" element={<PGListings />} />
+            <Route path="/pg/:id" element={<PGDetails />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route
+              path="/favorites"
+              element={
+                <PrivateRoute>
+                  <Favorites />
+                </PrivateRoute>
+              }
+            />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </main>
       <Footer />
     </div>
@@ -73,15 +79,15 @@ function App() {
               </PrivateRoute>
             }
           >
-            <Route index element={<AdminDashboard />} />
-            <Route path="pgs" element={<PGManagement />} />
-            <Route path="users" element={<UserManagement />} />
-            <Route path="reviews" element={<ReviewModeration />} />
-            <Route path="settings" element={<Settings />} />
+            <Route index element={<Suspense fallback={<PageLoader />}><AdminDashboard /></Suspense>} />
+            <Route path="pgs" element={<Suspense fallback={<PageLoader />}><PGManagement /></Suspense>} />
+            <Route path="users" element={<Suspense fallback={<PageLoader />}><UserManagement /></Suspense>} />
+            <Route path="reviews" element={<Suspense fallback={<PageLoader />}><ReviewModeration /></Suspense>} />
+            <Route path="settings" element={<Suspense fallback={<PageLoader />}><Settings /></Suspense>} />
           </Route>
 
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Suspense fallback={<PageLoader />}><Login /></Suspense>} />
+          <Route path="/register" element={<Suspense fallback={<PageLoader />}><Register /></Suspense>} />
 
           <Route path="*" element={<AppContent />} />
         </Routes>
