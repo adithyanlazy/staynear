@@ -12,6 +12,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [wrongPassword, setWrongPassword] = useState(false);
   const { login, loadUser } = useAuth();
   const navigate = useNavigate();
 
@@ -43,6 +44,9 @@ const Login = () => {
     } catch (err) {
       if (err.response?.status === 429) {
         toast.error('Too many attempts. Please wait a few minutes and try again.');
+      } else if (err.response?.status === 401) {
+        setWrongPassword(true);
+        setPassword('');
       } else {
         toast.error(err.response?.data?.message || 'Login failed');
       }
@@ -133,8 +137,8 @@ const Login = () => {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="input-field pl-10 pr-10"
+                  onChange={(e) => { setPassword(e.target.value); setWrongPassword(false); }}
+                  className={`input-field pl-10 pr-10 ${wrongPassword ? 'border-red-500 focus:ring-red-500' : ''}`}
                   placeholder="••••••••"
                   required
                 />
@@ -146,6 +150,9 @@ const Login = () => {
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+              {wrongPassword && (
+                <p className="mt-1.5 text-sm text-red-500">Wrong password</p>
+              )}
             </div>
 
             <button
