@@ -40,9 +40,7 @@ const Navbar = () => {
             {siteLogo ? (
               <img src={siteLogo} alt={siteName} className="h-10 w-10 rounded-xl object-cover" />
             ) : (
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
-                <Home className="w-5 h-5 text-white" />
-              </div>
+              <img src="/logo-icon.svg" alt={siteName} className="h-10 w-10" />
             )}
             <span className="text-xl font-display font-bold gradient-text">{siteName}</span>
           </Link>
