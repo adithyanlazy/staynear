@@ -94,9 +94,7 @@ const VerifyEmail = () => {
       <div className="max-w-md w-full mx-auto px-4">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
-              <Home className="w-6 h-6 text-white" />
-            </div>
+            <img src="/logo-icon.svg" alt="StayNear" className="w-12 h-12" />
           </Link>
           <h1 className="text-3xl font-display font-bold">Verify Your Email</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
