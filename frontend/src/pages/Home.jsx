@@ -58,7 +58,7 @@ const Home = () => {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-4xl mx-auto mb-10">
-            <img src="/logo-icon.svg" alt="StayNear" className="w-20 h-20 mx-auto mb-6" />
+            <img src="/staynear-logo.svg" alt="StayNear" className="w-20 h-20 mx-auto mb-6" />
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold mb-6">
               Find Your Perfect
               <span className="block gradient-text">PG in Mangalore</span>
