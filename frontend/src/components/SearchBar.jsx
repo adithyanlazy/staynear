@@ -139,8 +139,9 @@ const SearchBar = ({ variant = 'hero' }) => {
           onChange={(e) => setMaxRent(e.target.value)}
           className="input-field w-24 text-sm"
         />
-        <button type="submit" className="btn-primary">
+        <button type="submit" className="btn-primary flex items-center gap-2">
           <Search className="w-5 h-5" />
+          <span>Search</span>
         </button>
       </form>
     );
@@ -217,7 +218,7 @@ const SearchBar = ({ variant = 'hero' }) => {
 
           <button type="submit" className="btn-primary flex items-center gap-2">
             <Search className="w-5 h-5" />
-            <span className="hidden sm:inline">Search</span>
+            <span>Search</span>
           </button>
         </div>
 
