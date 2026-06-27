@@ -50,15 +50,13 @@ const AdminSidebar = ({ collapsed, onToggle, mobileOpen, onMobileToggle }) => {
         <div className={`flex items-center h-16 border-b border-gray-200 dark:border-gray-700 px-4 ${collapsed ? 'justify-center' : 'justify-between'}`}>
           {!collapsed && (
             <NavLink to="/" className="flex items-center space-x-2" onClick={handleNavClick}>
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
-                <Home className="w-4 h-4 text-white" />
-              </div>
+              <img src="/logo-icon.svg" alt="StayNear" className="w-8 h-8" />
               <span className="text-lg font-display font-bold gradient-text">StayNear</span>
             </NavLink>
           )}
           {collapsed && (
-            <NavLink to="/" className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center" onClick={handleNavClick}>
-              <Home className="w-4 h-4 text-white" />
+            <NavLink to="/" onClick={handleNavClick}>
+              <img src="/logo-icon.svg" alt="StayNear" className="w-8 h-8" />
             </NavLink>
           )}
         </div>
