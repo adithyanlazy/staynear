@@ -23,6 +23,12 @@ const PGManagement = () => {
   const [mediaTab, setMediaTab] = useState('images');
   const [isDraggingFiles, setIsDraggingFiles] = useState(false);
   const [isDraggingVideos, setIsDraggingVideos] = useState(false);
+  const [customCollege, setCustomCollege] = useState('');
+  const [customAmenity, setCustomAmenity] = useState('');
+  const [editingCollege, setEditingCollege] = useState(null);
+  const [editingCollegeVal, setEditingCollegeVal] = useState('');
+  const [editingAmenity, setEditingAmenity] = useState(null);
+  const [editingAmenityVal, setEditingAmenityVal] = useState('');
   const dragItem = useRef(null);
   const dragOverItem = useRef(null);
   const videoDragItem = useRef(null);
@@ -33,8 +39,8 @@ const PGManagement = () => {
   const [formData, setFormData] = useState({
     name: '', description: '', rent: '', deposit: '', gender: 'boys',
     foodIncluded: false, acAvailable: false, sharingType: 'double',
-    area: 'Surathkal', collegeNearby: [], address: '', latitude: '',
-    longitude: '', images: [], videos: [], amenities: [], contactNumber: '',
+    area: 'Surathkal', collegeNearby: [], address: '',
+    images: [], videos: [], amenities: [], contactNumber: '',
     contactName: '', featured: false,
   });
 
@@ -65,7 +71,7 @@ const PGManagement = () => {
         name: pg.name, description: pg.description, rent: pg.rent, deposit: pg.deposit,
         gender: pg.gender, foodIncluded: pg.foodIncluded, acAvailable: pg.acAvailable,
         sharingType: pg.sharingType, area: pg.area, collegeNearby: pg.collegeNearby || [],
-        address: pg.address, latitude: pg.latitude, longitude: pg.longitude,
+        address: pg.address,
         images: pg.images || [], videos: pg.videos || [], amenities: pg.amenities || [],
         contactNumber: pg.contactNumber, contactName: pg.contactName || '', featured: pg.featured,
       });
@@ -74,8 +80,8 @@ const PGManagement = () => {
       setFormData({
         name: '', description: '', rent: '', deposit: '', gender: 'boys',
         foodIncluded: false, acAvailable: false, sharingType: 'double',
-        area: 'Surathkal', collegeNearby: [], address: '', latitude: '',
-        longitude: '', images: [], videos: [], amenities: [], contactNumber: '',
+        area: 'Surathkal', collegeNearby: [], address: '',
+        images: [], videos: [], amenities: [], contactNumber: '',
         contactName: '', featured: false,
       });
     }
@@ -125,6 +131,44 @@ const PGManagement = () => {
         ? prev.amenities.filter(a => a !== amenity)
         : [...prev.amenities, amenity],
     }));
+  };
+
+  const addCustomCollege = () => {
+    const val = customCollege.trim();
+    if (!val) return;
+    if (!formData.collegeNearby.includes(val)) {
+      setFormData(prev => ({ ...prev, collegeNearby: [...prev.collegeNearby, val] }));
+    }
+    setCustomCollege('');
+  };
+
+  const addCustomAmenity = () => {
+    const val = customAmenity.trim();
+    if (!val) return;
+    if (!formData.amenities.includes(val)) {
+      setFormData(prev => ({ ...prev, amenities: [...prev.amenities, val] }));
+    }
+    setCustomAmenity('');
+  };
+
+  const saveEditCollege = (oldVal) => {
+    const newVal = editingCollegeVal.trim();
+    if (!newVal || newVal === oldVal) { setEditingCollege(null); return; }
+    setFormData(prev => ({
+      ...prev,
+      collegeNearby: prev.collegeNearby.map(c => c === oldVal ? newVal : c),
+    }));
+    setEditingCollege(null);
+  };
+
+  const saveEditAmenity = (oldVal) => {
+    const newVal = editingAmenityVal.trim();
+    if (!newVal || newVal === oldVal) { setEditingAmenity(null); return; }
+    setFormData(prev => ({
+      ...prev,
+      amenities: prev.amenities.map(a => a === oldVal ? newVal : a),
+    }));
+    setEditingAmenity(null);
   };
 
   const isValidImageUrl = (url) => {
@@ -627,14 +671,6 @@ const PGManagement = () => {
                   <label className="block text-sm font-medium mb-1">Address</label>
                   <input type="text" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} className="input-field" required />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Latitude</label>
-                  <input type="number" step="any" value={formData.latitude} onChange={(e) => setFormData({ ...formData, latitude: e.target.value })} className="input-field" required />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Longitude</label>
-                  <input type="number" step="any" value={formData.longitude} onChange={(e) => setFormData({ ...formData, longitude: e.target.value })} className="input-field" required />
-                </div>
               </div>
 
               <div className="flex flex-wrap gap-4">
@@ -652,25 +688,85 @@ const PGManagement = () => {
 
               <div>
                 <label className="block text-sm font-medium mb-2">Nearby Colleges</label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mb-2">
                   {COLLEGES.map(college => (
                     <button key={college} type="button" onClick={() => toggleCollege(college)}
                       className={`px-3 py-1 rounded-lg text-sm transition-colors ${formData.collegeNearby.includes(college) ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'}`}>
                       {college}
                     </button>
                   ))}
+                  {formData.collegeNearby.filter(c => !COLLEGES.includes(c)).map(college => (
+                    editingCollege === college ? (
+                      <div key={college} className="flex items-center gap-1">
+                        <input type="text" value={editingCollegeVal} onChange={(e) => setEditingCollegeVal(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && saveEditCollege(college)}
+                          className="px-2 py-1 rounded-lg text-sm border border-primary-500 w-36" autoFocus />
+                        <button type="button" onClick={() => saveEditCollege(college)}
+                          className="text-green-500 hover:text-green-600"><span className="text-sm">✓</span></button>
+                        <button type="button" onClick={() => setEditingCollege(null)}
+                          className="text-gray-400 hover:text-gray-600"><X className="w-3 h-3" /></button>
+                      </div>
+                    ) : (
+                      <span key={college} className="px-3 py-1 rounded-lg text-sm transition-colors bg-primary-500 text-white flex items-center gap-1">
+                        <span onClick={() => toggleCollege(college)} className="cursor-pointer">{college}</span>
+                        <button type="button" onClick={() => { setEditingCollege(college); setEditingCollegeVal(college); }}
+                          className="hover:text-white/70"><Edit className="w-3 h-3" /></button>
+                        <button type="button" onClick={() => toggleCollege(college)}
+                          className="hover:text-white/70"><X className="w-3 h-3" /></button>
+                      </span>
+                    )
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input type="text" value={customCollege} onChange={(e) => setCustomCollege(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomCollege())}
+                    placeholder="Add custom college..." className="input-field flex-1" />
+                  <button type="button" onClick={addCustomCollege}
+                    className="px-3 py-1 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-1 text-sm">
+                    <Plus className="w-4 h-4" /> Add
+                  </button>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2">Amenities</label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mb-2">
                   {AMENITIES.map(amenity => (
                     <button key={amenity} type="button" onClick={() => toggleAmenity(amenity)}
                       className={`px-3 py-1 rounded-lg text-sm transition-colors ${formData.amenities.includes(amenity) ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'}`}>
                       {amenity}
                     </button>
                   ))}
+                  {formData.amenities.filter(a => !AMENITIES.includes(a)).map(amenity => (
+                    editingAmenity === amenity ? (
+                      <div key={amenity} className="flex items-center gap-1">
+                        <input type="text" value={editingAmenityVal} onChange={(e) => setEditingAmenityVal(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && saveEditAmenity(amenity)}
+                          className="px-2 py-1 rounded-lg text-sm border border-primary-500 w-36" autoFocus />
+                        <button type="button" onClick={() => saveEditAmenity(amenity)}
+                          className="text-green-500 hover:text-green-600"><span className="text-sm">✓</span></button>
+                        <button type="button" onClick={() => setEditingAmenity(null)}
+                          className="text-gray-400 hover:text-gray-600"><X className="w-3 h-3" /></button>
+                      </div>
+                    ) : (
+                      <span key={amenity} className="px-3 py-1 rounded-lg text-sm transition-colors bg-primary-500 text-white flex items-center gap-1">
+                        <span onClick={() => toggleAmenity(amenity)} className="cursor-pointer">{amenity}</span>
+                        <button type="button" onClick={() => { setEditingAmenity(amenity); setEditingAmenityVal(amenity); }}
+                          className="hover:text-white/70"><Edit className="w-3 h-3" /></button>
+                        <button type="button" onClick={() => toggleAmenity(amenity)}
+                          className="hover:text-white/70"><X className="w-3 h-3" /></button>
+                      </span>
+                    )
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input type="text" value={customAmenity} onChange={(e) => setCustomAmenity(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomAmenity())}
+                    placeholder="Add custom amenity..." className="input-field flex-1" />
+                  <button type="button" onClick={addCustomAmenity}
+                    className="px-3 py-1 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-1 text-sm">
+                    <Plus className="w-4 h-4" /> Add
+                  </button>
                 </div>
               </div>
 
