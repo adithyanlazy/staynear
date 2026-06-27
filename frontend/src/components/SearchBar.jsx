@@ -125,20 +125,6 @@ const SearchBar = ({ variant = 'hero' }) => {
             </div>
           )}
         </div>
-        <input
-          type="number"
-          placeholder="Min ₹"
-          value={minRent}
-          onChange={(e) => setMinRent(e.target.value)}
-          className="input-field w-24 text-sm"
-        />
-        <input
-          type="number"
-          placeholder="Max ₹"
-          value={maxRent}
-          onChange={(e) => setMaxRent(e.target.value)}
-          className="input-field w-24 text-sm"
-        />
         <button type="submit" className="btn-primary flex items-center gap-2">
           <Search className="w-5 h-5" />
           <span>Search</span>
