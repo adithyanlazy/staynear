@@ -117,26 +117,6 @@ const FilterPanel = ({ filters, setFilters, isOpen, setIsOpen }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Budget Range (₹/month)</label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  placeholder="Min"
-                  value={filters.minRent}
-                  onChange={(e) => handleChange('minRent', e.target.value)}
-                  className="input-field text-sm"
-                />
-                <input
-                  type="number"
-                  placeholder="Max"
-                  value={filters.maxRent}
-                  onChange={(e) => handleChange('maxRent', e.target.value)}
-                  className="input-field text-sm"
-                />
-              </div>
-            </div>
-
-            <div>
               <label className="block text-sm font-medium mb-2">Sharing Type</label>
               <div className="flex flex-wrap gap-2">
                 {SHARING_OPTIONS.map(opt => (
