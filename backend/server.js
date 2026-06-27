@@ -40,7 +40,7 @@ app.use('/api/auth/resend-verification', authLimiter);
 app.use(cors({
   origin: function(origin, callback) {
     const allowed = (process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',') : ['http://localhost:5173']);
-    if (!origin || allowed.includes(origin) || origin.endsWith('.vercel.app')) {
+    if (!origin || allowed.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));

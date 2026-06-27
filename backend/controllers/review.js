@@ -77,7 +77,7 @@ exports.updateReview = async (req, res, next) => {
     review = await Review.findByIdAndUpdate(req.params.id, {
       rating: req.body.rating || review.rating,
       comment: req.body.comment || review.comment
-    }, { new: true });
+    }, { new: true, runValidators: true });
 
     res.status(200).json({ success: true, data: review });
   } catch (err) {

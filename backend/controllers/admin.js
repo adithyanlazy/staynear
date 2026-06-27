@@ -98,7 +98,7 @@ exports.updateUserRole = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Cannot change your own role' });
     }
 
-    const updated = await User.findByIdAndUpdate(req.params.id, { role: req.body.role }, { new: true });
+    const updated = await User.findByIdAndUpdate(req.params.id, { role: req.body.role }, { new: true, runValidators: true });
     res.status(200).json({ success: true, data: updated });
   } catch (err) {
     next(err);

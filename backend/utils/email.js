@@ -50,7 +50,9 @@ const sendOTP = async (email, otp) => {
     }
   }
 
-  console.log(`\n📧 OTP for ${email}: ${otp}\n`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`\n📧 OTP for ${email}: ${otp}\n`);
+  }
   return false;
 };
 

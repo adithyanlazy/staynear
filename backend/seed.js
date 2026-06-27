@@ -205,6 +205,11 @@ const samplePGs = [
 ];
 
 const seedDB = async () => {
+  if (process.env.NODE_ENV === 'production') {
+    console.error('Cannot run seed in production');
+    process.exit(1);
+  }
+
   try {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('MongoDB Connected for seeding');

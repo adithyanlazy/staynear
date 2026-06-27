@@ -253,7 +253,12 @@ exports.getMe = async (req, res, next) => {
     const favorites = user.favorites
       .filter(fav => fav.pgId)
       .map(fav => ({ ...fav.pgId.toObject(), favoritedAt: fav.favoritedAt }));
-    res.status(200).json({ success: true, data: { ...user.toObject(), favorites } });
+    const userData = user.toObject();
+    delete userData.password;
+    delete userData.verificationOTP;
+    delete userData.verificationOTPExpiry;
+    delete userData.tokenVersion;
+    res.status(200).json({ success: true, data: { ...userData, favorites } });
   } catch (err) {
     next(err);
   }

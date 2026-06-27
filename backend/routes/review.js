@@ -14,14 +14,14 @@ router
   .get(getReviews);
 
 router
+  .route('/pg/:pgId')
+  .get(getReviews)
+  .post(protect, addReview);
+
+router
   .route('/:id')
   .get(getReview)
   .put(protect, updateReview)
   .delete(protect, deleteReview);
-
-router
-  .route('/pg/:pgId')
-  .get(getReviews)
-  .post(protect, addReview);
 
 module.exports = router;
