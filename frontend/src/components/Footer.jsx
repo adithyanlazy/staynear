@@ -11,17 +11,14 @@ const Footer = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [settingsRes, logoRes] = await Promise.all([
-          api.get('/admin/settings'),
-          api.get('/site-logo'),
-        ]);
-        const s = settingsRes.data.data;
+        const res = await api.get('/settings');
+        const s = res.data.data;
         setContact({
           contactEmail: s.contactEmail || 'contact@staynear.com',
           contactPhone: s.contactPhone || '+91 9876543210',
         });
-        if (logoRes.data.data.siteLogo) setSiteLogo(logoRes.data.data.siteLogo);
-        if (logoRes.data.data.siteName) setSiteName(logoRes.data.data.siteName);
+        if (s.siteLogo) setSiteLogo(s.siteLogo);
+        if (s.siteName) setSiteName(s.siteName);
       } catch (err) {
         // keep defaults
       }
