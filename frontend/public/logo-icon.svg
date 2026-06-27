@@ -5,9 +5,11 @@
       <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
     </linearGradient>
   </defs>
-
+  
+  <!-- Location pin -->
   <path d="M50 5 C28 5 10 23 10 45 C10 72 50 95 50 95 C50 95 90 72 90 45 C90 23 72 5 50 5Z" fill="url(#iconGrad)" />
-
+  
+  <!-- House inside -->
   <path d="M50 25 L30 40 L30 60 L70 60 L70 40 Z" fill="white" opacity="0.95"/>
   <rect x="43" y="48" width="14" height="12" fill="url(#iconGrad)" rx="1.5"/>
   <rect x="35" y="43" width="10" height="8" fill="url(#iconGrad)" rx="1"/>
