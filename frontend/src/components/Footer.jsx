@@ -35,7 +35,7 @@ const Footer = () => {
               {siteLogo ? (
                 <img src={siteLogo} alt={siteName} className="h-10 w-10 rounded-xl object-cover" />
               ) : (
-                <img src="/staynear-logo.svg" alt={siteName} className="h-10 w-10" />
+                <img src="/staynear-logo.png" alt={siteName} className="h-10 w-10" />
               )}
               <span className="text-xl font-display font-bold text-white">{siteName}</span>
             </Link>
