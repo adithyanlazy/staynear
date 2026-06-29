@@ -8,9 +8,9 @@ import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { useCountUp } from '../hooks/useCountUp';
 import api from '../utils/api';
 
-const StatItem = ({ icon: Icon, value, label, loading, isVisible }) => {
+const StatItem = ({ icon: Icon, value, label, isVisible }) => {
   const numValue = typeof value === 'string' ? parseFloat(value) : value;
-  const animatedValue = useCountUp(numValue, 2000, isVisible && !loading && !isNaN(numValue));
+  const animatedValue = useCountUp(numValue, 2000, isVisible && !isNaN(numValue));
   const hasSuffix = typeof value === 'string' && value.includes('+');
 
   return (
@@ -18,13 +18,9 @@ const StatItem = ({ icon: Icon, value, label, loading, isVisible }) => {
       <div className="w-14 h-14 mx-auto mb-4 bg-gradient-to-br from-primary-100 to-secondary-100 dark:from-primary-900/30 dark:to-secondary-900/30 rounded-2xl flex items-center justify-center">
         <Icon className="w-7 h-7 text-primary-500" />
       </div>
-      {loading ? (
-        <div className="h-9 w-20 mx-auto bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
-      ) : (
-        <div className="text-3xl font-bold text-gray-900 dark:text-white transition-all duration-500 ease-out">
-          {animatedValue}{hasSuffix ? '+' : ''}
-        </div>
-      )}
+      <div className="text-3xl font-bold text-gray-900 dark:text-white">
+        {animatedValue}{hasSuffix ? '+' : ''}
+      </div>
       <div className="text-gray-500 dark:text-gray-400">{label}</div>
     </div>
   );
@@ -121,10 +117,10 @@ const Home = () => {
       <section ref={statsRef} className={`py-12 bg-white dark:bg-gray-800 animate-on-scroll ${statsVisible ? 'visible' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <StatItem icon={Building} value={stats?.totalPGs} label="Total PGs" loading={loading} isVisible={statsVisible} />
-            <StatItem icon={MapPin} value={stats?.totalAreas} label="Areas Covered" loading={loading} isVisible={statsVisible} />
-            <StatItem icon={Users} value={stats?.happyStudents} label="Happy Students" loading={loading} isVisible={statsVisible} />
-            <StatItem icon={Star} value={stats?.avgRating} label="Avg Rating" loading={loading} isVisible={statsVisible} />
+            <StatItem icon={Building} value={stats?.totalPGs} label="Total PGs" isVisible={statsVisible} />
+            <StatItem icon={MapPin} value={stats?.totalAreas} label="Areas Covered" isVisible={statsVisible} />
+            <StatItem icon={Users} value={stats?.happyStudents} label="Happy Students" isVisible={statsVisible} />
+            <StatItem icon={Star} value={stats?.avgRating} label="Avg Rating" isVisible={statsVisible} />
           </div>
         </div>
       </section>
