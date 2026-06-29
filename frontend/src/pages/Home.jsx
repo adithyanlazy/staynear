@@ -114,7 +114,11 @@ const Home = () => {
         </div>
       </section>
 
-      <section ref={statsRef} className={`py-12 bg-white dark:bg-gray-800 animate-on-scroll ${statsVisible ? 'visible' : ''}`}>
+      <section
+        ref={statsRef}
+        className="py-12 bg-white dark:bg-gray-800 transition-all duration-1000 ease-out"
+        style={{ opacity: statsVisible ? 1 : 0, transform: statsVisible ? 'translateY(0)' : 'translateY(20px)' }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <StatItem icon={Building} value={stats?.totalPGs} label="Total PGs" isVisible={statsVisible} />
