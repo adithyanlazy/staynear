@@ -38,9 +38,9 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
             {siteLogo ? (
-              <img src={siteLogo} alt={siteName} className="h-10 w-10 rounded-xl object-cover" />
+              <img src={siteLogo} alt={siteName} className="h-10 w-10 rounded-xl object-cover logo-dark" />
             ) : (
-              <img src="/staynear-logo.png" alt={siteName} className="h-10 w-10" />
+              <img src="/staynear-logo.png" alt={siteName} className="h-10 w-10 logo-dark" />
             )}
             <span className="text-xl font-display font-bold gradient-text">{siteName}</span>
           </Link>

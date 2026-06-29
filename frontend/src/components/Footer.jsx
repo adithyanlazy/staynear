@@ -33,9 +33,9 @@ const Footer = () => {
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-2">
               {siteLogo ? (
-                <img src={siteLogo} alt={siteName} className="h-10 w-10 rounded-xl object-cover" />
+                <img src={siteLogo} alt={siteName} className="h-10 w-10 rounded-xl object-cover logo-dark" />
               ) : (
-                <img src="/staynear-logo.png" alt={siteName} className="h-10 w-10" />
+                <img src="/staynear-logo.png" alt={siteName} className="h-10 w-10 logo-dark" />
               )}
               <span className="text-xl font-display font-bold text-white">{siteName}</span>
             </Link>
