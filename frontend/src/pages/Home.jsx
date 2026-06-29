@@ -99,16 +99,20 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { icon: Building, label: 'Total PGs', value: stats ? stats.totalPGs : '--' },
-              { icon: MapPin, label: 'Areas Covered', value: stats ? stats.totalAreas : '--' },
-              { icon: Users, label: 'Happy Students', value: stats ? stats.happyStudents : '--' },
-              { icon: Star, label: 'Avg Rating', value: stats ? stats.avgRating : '--' },
+              { icon: Building, label: 'Total PGs', value: stats?.totalPGs },
+              { icon: MapPin, label: 'Areas Covered', value: stats?.totalAreas },
+              { icon: Users, label: 'Happy Students', value: stats?.happyStudents },
+              { icon: Star, label: 'Avg Rating', value: stats?.avgRating },
             ].map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="w-14 h-14 mx-auto mb-4 bg-gradient-to-br from-primary-100 to-secondary-100 dark:from-primary-900/30 dark:to-secondary-900/30 rounded-2xl flex items-center justify-center">
                   <stat.icon className="w-7 h-7 text-primary-500" />
                 </div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
+                {loading ? (
+                  <div className="h-9 w-20 mx-auto bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+                ) : (
+                  <div className="text-3xl font-bold text-gray-900 dark:text-white transition-all duration-500 ease-out">{stat.value}</div>
+                )}
                 <div className="text-gray-500 dark:text-gray-400">{stat.label}</div>
               </div>
             ))}
