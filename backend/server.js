@@ -37,6 +37,7 @@ app.use('/api/auth/register', authLimiter);
 app.use('/api/auth/register-phone', authLimiter);
 app.use('/api/auth/verify-email', authLimiter);
 app.use('/api/auth/resend-verification', authLimiter);
+app.use('/api/auth/forgot-password', authLimiter);
 
 app.use(cors({
   origin: function(origin, callback) {

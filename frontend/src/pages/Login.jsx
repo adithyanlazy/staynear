@@ -153,6 +153,13 @@ const Login = () => {
               {wrongPassword && (
                 <p className="mt-1.5 text-sm text-red-500">Wrong password</p>
               )}
+              {loginType === 'phone' && (
+                <div className="flex justify-end mt-1">
+                  <Link to="/forgot-password" className="text-sm text-primary-500 hover:text-primary-600">
+                    Forgot password?
+                  </Link>
+                </div>
+              )}
             </div>
 
             <button

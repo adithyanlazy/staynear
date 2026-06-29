@@ -322,6 +322,27 @@ exports.getFavorites = async (req, res) => {
   }
 };
 
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const { phone, newPassword } = req.body;
+    if (!phone || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Please provide phone and new password' });
+    }
+
+    const user = await User.findOne({ phone }).select('+password');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'No account found with this phone number' });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({ success: true, message: 'Password reset successful. You can now login.' });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const sendTokenResponse = (user, statusCode, res) => {
   const token = jwt.sign({ id: user._id, v: user.tokenVersion || 0 }, process.env.JWT_SECRET, {
     expiresIn: '7d'
