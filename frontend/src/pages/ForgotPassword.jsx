@@ -7,12 +7,17 @@ import api from '../utils/api';
 const ForgotPassword = () => {
   const [phone, setPhone] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
     setLoading(true);
     try {
       await api.post('/auth/forgot-password', { phone, newPassword });
@@ -79,6 +84,21 @@ const ForgotPassword = () => {
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Confirm Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="input-field pl-10 pr-10"
+                  placeholder="Re-enter new password"
+                  minLength={8}
+                  required
+                />
               </div>
             </div>
             <button
