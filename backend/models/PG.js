@@ -49,14 +49,6 @@ const PGSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add an address']
   },
-  latitude: {
-    type: Number,
-    required: [true, 'Please add latitude']
-  },
-  longitude: {
-    type: Number,
-    required: [true, 'Please add longitude']
-  },
   images: [{
     type: String
   }],

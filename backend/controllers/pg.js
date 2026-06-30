@@ -5,7 +5,7 @@ const Settings = require('../models/Settings');
 const PG_FIELDS = [
   'name', 'description', 'rent', 'deposit', 'gender', 'foodIncluded',
   'acAvailable', 'sharingType', 'area', 'collegeNearby', 'address',
-  'latitude', 'longitude', 'images', 'videos', 'amenities',
+  'images', 'videos', 'amenities',
   'contactNumber', 'contactName', 'featured', 'active'
 ];
 
