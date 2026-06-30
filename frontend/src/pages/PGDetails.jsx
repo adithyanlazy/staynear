@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Star, Heart, Phone, Utensils, Snowflake, Users, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Star, Heart, Phone, Utensils, Snowflake, Users, ArrowLeft, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import PGCard from '../components/PGCard';
 import LoadingSkeleton from '../components/LoadingSkeleton';
@@ -17,6 +17,8 @@ const PGDetails = () => {
   const [currentImage, setCurrentImage] = useState(0);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,6 +79,36 @@ const PGDetails = () => {
     }
   };
 
+  const openLightbox = (index) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+    document.body.style.overflow = 'unset';
+  };
+
+  const nextLightboxImage = () => {
+    setLightboxIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  const prevLightboxImage = () => {
+    setLightboxIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!lightboxOpen) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') nextLightboxImage();
+      if (e.key === 'ArrowLeft') prevLightboxImage();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lightboxOpen]);
+
   if (loading) {
     return (
       <div className="min-h-screen pt-24 pb-16">
@@ -115,7 +147,10 @@ const PGDetails = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <div className="relative rounded-2xl overflow-hidden bg-black">
+            <div
+              className="relative rounded-2xl overflow-hidden bg-black cursor-pointer"
+              onClick={() => openLightbox(currentImage)}
+            >
               <div className="w-full max-h-[500px]">
                 <img
                   src={images[currentImage]}
@@ -419,6 +454,52 @@ const PGDetails = () => {
           </div>
         )}
       </div>
+
+      {/* Lightbox Modal */}
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"
+          onClick={closeLightbox}
+        >
+          <button
+            onClick={closeLightbox}
+            className="absolute top-4 right-4 p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors z-10"
+          >
+            <X className="w-6 h-6 text-white" />
+          </button>
+
+          <button
+            onClick={(e) => { e.stopPropagation(); prevLightboxImage(); }}
+            className="absolute left-4 p-3 bg-white/10 rounded-full hover:bg-white/20 transition-colors z-10"
+          >
+            <ChevronLeft className="w-6 h-6 text-white" />
+          </button>
+
+          <div
+            className="max-w-[90vw] max-h-[90vh] flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={images[lightboxIndex]}
+              alt={pg.name}
+              className="max-w-full max-h-[90vh] object-contain"
+            />
+          </div>
+
+          <button
+            onClick={(e) => { e.stopPropagation(); nextLightboxImage(); }}
+            className="absolute right-4 p-3 bg-white/10 rounded-full hover:bg-white/20 transition-colors z-10"
+          >
+            <ChevronRight className="w-6 h-6 text-white" />
+          </button>
+
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-4">
+            <span className="text-white text-sm">
+              {lightboxIndex + 1} / {images.length}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
