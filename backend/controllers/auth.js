@@ -130,12 +130,11 @@ exports.login = async (req, res, next) => {
       await User.findByIdAndUpdate(user._id, { emailVerified: true });
     }
 
-    await User.findByIdAndUpdate(user._id, {
-      lastLogin: new Date(),
-      $inc: { loginCount: 1, tokenVersion: 1 },
-    });
-
-    const updatedUser = await User.findById(user._id);
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: user._id },
+      { lastLogin: new Date(), $inc: { loginCount: 1, tokenVersion: 1 } },
+      { new: true }
+    );
     sendTokenResponse(updatedUser, 200, res);
   } catch (err) {
     next(err);
@@ -161,12 +160,11 @@ exports.loginPhone = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    await User.findByIdAndUpdate(user._id, {
-      lastLogin: new Date(),
-      $inc: { loginCount: 1, tokenVersion: 1 },
-    });
-
-    const updatedUser = await User.findById(user._id);
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: user._id },
+      { lastLogin: new Date(), $inc: { loginCount: 1, tokenVersion: 1 } },
+      { new: true }
+    );
     sendTokenResponse(updatedUser, 200, res);
   } catch (err) {
     next(err);
@@ -246,7 +244,10 @@ exports.resendVerification = async (req, res, next) => {
 
 exports.getMe = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id).populate('favorites.pgId');
+    const user = await User.findById(req.user._id).populate({
+      path: 'favorites.pgId',
+      select: 'name rent area gender images featured'
+    });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }

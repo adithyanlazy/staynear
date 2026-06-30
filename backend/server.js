@@ -1,4 +1,3 @@
-require('dns').setServers(['8.8.8.8', '8.8.4.4']);
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
@@ -77,12 +76,26 @@ app.get('/api/health', (req, res) => {
 
 const Settings = require('./models/Settings');
 
+const settingsCache = { data: null, ts: 0 };
+const SETTINGS_TTL = 60 * 1000;
+
+const getSettings = async () => {
+  const now = Date.now();
+  if (settingsCache.data && now - settingsCache.ts < SETTINGS_TTL) {
+    return settingsCache.data;
+  }
+  let settings = await Settings.findOne();
+  if (!settings) {
+    settings = await Settings.create({});
+  }
+  settingsCache.data = settings;
+  settingsCache.ts = now;
+  return settings;
+};
+
 app.get('/api/suggestions', async (req, res) => {
   try {
-    let settings = await Settings.findOne();
-    if (!settings) {
-      settings = await Settings.create({});
-    }
+    const settings = await getSettings();
     res.status(200).json({ success: true, data: { areas: settings.areas, colleges: settings.colleges } });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -91,10 +104,7 @@ app.get('/api/suggestions', async (req, res) => {
 
 app.get('/api/site-logo', async (req, res) => {
   try {
-    let settings = await Settings.findOne();
-    if (!settings) {
-      settings = await Settings.create({});
-    }
+    const settings = await getSettings();
     res.status(200).json({ success: true, data: { siteLogo: settings.siteLogo || '', siteName: settings.siteName || 'StayNear' } });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -103,10 +113,7 @@ app.get('/api/site-logo', async (req, res) => {
 
 app.get('/api/settings', async (req, res) => {
   try {
-    let settings = await Settings.findOne();
-    if (!settings) {
-      settings = await Settings.create({});
-    }
+    const settings = await getSettings();
     res.status(200).json({
       success: true,
       data: {
@@ -123,10 +130,7 @@ app.get('/api/settings', async (req, res) => {
 
 app.get('/api/testimonials', async (req, res) => {
   try {
-    let settings = await Settings.findOne();
-    if (!settings) {
-      settings = await Settings.create({});
-    }
+    const settings = await getSettings();
     res.status(200).json({ success: true, data: settings.testimonials || [] });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
