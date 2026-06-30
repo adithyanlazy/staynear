@@ -52,7 +52,7 @@ const PGCard = ({ pg, onRemoveFavorite }) => {
         <img
           src={pg.images?.[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800'}
           alt={pg.name}
-          className="w-full max-h-64 md:max-h-56 object-contain group-hover:scale-105 transition-transform duration-700"
+          className="w-full object-contain group-hover:scale-105 transition-transform duration-700"
         />
 
         {/* Gradient overlay */}
