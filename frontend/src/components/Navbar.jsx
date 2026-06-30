@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, Heart, User, LogOut, Shield, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -13,6 +13,8 @@ const Navbar = () => {
   const { darkMode, toggleDarkMode } = useTheme();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isHome = pathname === '/';
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -39,18 +41,20 @@ const Navbar = () => {
     setIsOpen(false);
   };
 
-  const linkClass = scrolled
+  const solid = scrolled || !isHome;
+
+  const linkClass = solid
     ? 'text-gray-600 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400'
     : 'text-white/70 hover:text-white';
 
-  const iconBtnClass = scrolled
+  const iconBtnClass = solid
     ? 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/8'
     : 'text-white/60 hover:text-white hover:bg-white/10';
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
+        solid
           ? 'bg-white/90 dark:bg-[#030e0d]/90 backdrop-blur-xl border-b border-gray-200/50 dark:border-white/[0.07] shadow-sm'
           : 'bg-transparent border-b border-transparent'
       }`}
@@ -66,7 +70,7 @@ const Navbar = () => {
               <img src="/staynear-logo.png" alt={siteName} className="h-9 w-9 logo-dark" />
             )}
             <span className={`text-xl font-display font-bold transition-colors duration-300 ${
-              scrolled ? 'text-gray-900 dark:text-white' : 'text-white'
+              solid ? 'text-gray-900 dark:text-white' : 'text-white'
             }`}>
               {siteName}
             </span>
@@ -111,7 +115,7 @@ const Navbar = () => {
                     <User className="w-4 h-4 text-white" />
                   </div>
                   <span className={`text-sm font-medium transition-colors ${
-                    scrolled ? 'text-gray-900 dark:text-white' : 'text-white'
+                    solid ? 'text-gray-900 dark:text-white' : 'text-white'
                   }`}>
                     {user.name}
                   </span>
@@ -119,7 +123,7 @@ const Navbar = () => {
                 <button
                   onClick={handleLogout}
                   className={`flex items-center gap-1.5 text-sm transition-colors ${
-                    scrolled ? 'text-gray-500 dark:text-gray-400 hover:text-red-500' : 'text-white/50 hover:text-white'
+                    solid ? 'text-gray-500 dark:text-gray-400 hover:text-red-500' : 'text-white/50 hover:text-white'
                   }`}
                 >
                   <LogOut className="w-4 h-4" />
@@ -131,7 +135,7 @@ const Navbar = () => {
                 <Link
                   to="/login"
                   className={`text-sm font-semibold px-4 py-2 rounded-xl transition-all duration-200 ${
-                    scrolled
+                    solid
                       ? 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/8'
                       : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
