@@ -116,11 +116,13 @@ const PGDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <div className="relative rounded-2xl overflow-hidden bg-black">
-              <img
-                src={images[currentImage]}
-                alt={pg.name}
-                className="w-full object-contain"
-              />
+              <div className="w-full max-h-[500px]">
+                <img
+                  src={images[currentImage]}
+                  alt={pg.name}
+                  className="w-full object-contain"
+                />
+              </div>
               {images.length > 1 && (
                 <>
                   <button
@@ -155,11 +157,11 @@ const PGDetails = () => {
                 <button
                   key={i}
                   onClick={() => setCurrentImage(i)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors bg-black ${
+                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
                     i === currentImage ? 'border-primary-500' : 'border-transparent'
                   }`}
                 >
-                  <img src={img} alt="" className="w-full h-full object-contain" />
+                  <img src={img} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
