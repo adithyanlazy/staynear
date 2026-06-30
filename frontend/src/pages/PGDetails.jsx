@@ -116,7 +116,7 @@ const PGDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <div className="relative rounded-2xl overflow-hidden">
-              <div className="w-full">
+              <div className="w-full max-h-[500px]">
                 <img
                   src={images[currentImage]}
                   alt={pg.name}
