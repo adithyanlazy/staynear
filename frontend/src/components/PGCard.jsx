@@ -48,7 +48,7 @@ const PGCard = ({ pg, onRemoveFavorite }) => {
   return (
     <Link to={`/pg/${pg._id}`} className="card-hover group block">
       {/* Image */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden bg-black">
         <img
           src={pg.images?.[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800'}
           alt={pg.name}
