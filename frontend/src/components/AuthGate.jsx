@@ -34,7 +34,7 @@ const AuthGate = () => {
               <img src="/staynear-logo.png" alt="StayNear" className="w-20 h-20 mx-auto mb-6 logo-dark" />
               <h1 className="text-4xl md:text-5xl font-display font-bold text-gray-900 dark:text-white mb-4">
                 Find Your Perfect
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500"> PG Home</span>
+                <span className="text-primary-600 dark:text-primary-400"> PG</span>
               </h1>
               <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
                 Discover comfortable PG accommodations near your college in Mangalore. 
