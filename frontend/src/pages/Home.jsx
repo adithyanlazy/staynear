@@ -172,7 +172,7 @@ const Home = () => {
         </div>
 
         {/* Fade to next section */}
-        <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white dark:from-[#07070f] to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#f0fdfa] dark:from-[#07070f] to-transparent pointer-events-none" />
       </section>
 
       {/* ── STATS ── */}
