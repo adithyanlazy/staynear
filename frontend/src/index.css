@@ -131,6 +131,10 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
+  .font-display {
+    font-family: 'General Sans', system-ui, sans-serif;
+  }
+
   .logo-dark {
     @apply transition-all duration-300;
   }

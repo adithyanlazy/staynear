@@ -41,14 +41,19 @@ app.use('/api/auth/forgot-password', authLimiter);
 
 app.use(cors({
   origin: function(origin, callback) {
-    const allowed = (process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',') : ['http://localhost:5173']);
+    if (process.env.NODE_ENV === 'development') {
+      return callback(null, true);
+    }
+    const allowed = (process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',').map(u => u.trim()) : ['http://localhost:5173']);
     if (!origin || allowed.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 }));
 
 app.use(express.json({ limit: '10mb' }));

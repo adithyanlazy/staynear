@@ -38,8 +38,8 @@ export default {
         },
       },
       fontFamily: {
-        sans:    ['Josefin Sans', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['Cinzel', 'Georgia', 'serif'],
+        sans:    ['General Sans', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['General Sans', 'system-ui', 'sans-serif'],
         body:    ['Inter', 'system-ui', 'sans-serif'],
       },
       animation: {
