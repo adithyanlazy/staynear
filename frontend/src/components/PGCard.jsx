@@ -48,11 +48,11 @@ const PGCard = ({ pg, onRemoveFavorite }) => {
   return (
     <Link to={`/pg/${pg._id}`} className="card-hover group block">
       {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden">
+      <div className="relative overflow-hidden">
         <img
           src={pg.images?.[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800'}
           alt={pg.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          className="w-full object-contain group-hover:scale-105 transition-transform duration-700"
         />
 
         {/* Gradient overlay */}

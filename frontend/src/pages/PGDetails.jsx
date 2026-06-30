@@ -116,11 +116,11 @@ const PGDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <div className="relative rounded-2xl overflow-hidden">
-              <div className="aspect-video">
+              <div className="w-full">
                 <img
                   src={images[currentImage]}
                   alt={pg.name}
-                  className="w-full h-full object-cover"
+                  className="w-full object-contain"
                 />
               </div>
               {images.length > 1 && (
