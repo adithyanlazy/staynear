@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Home, Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import api from '../utils/api';
 
 const Footer = () => {
@@ -27,11 +27,13 @@ const Footer = () => {
   }, []);
 
   return (
-    <footer className="bg-gray-900 text-gray-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="space-y-4">
-            <Link to="/" className="flex items-center space-x-2">
+    <footer className="bg-[#020b0a] text-gray-500 border-t border-white/[0.06]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-14">
+
+          {/* Brand */}
+          <div className="space-y-5">
+            <Link to="/" className="flex items-center gap-2.5">
               {siteLogo ? (
                 <img src={siteLogo} alt={siteName} className="h-10 w-10 rounded-xl object-cover logo-dark" />
               ) : (
@@ -39,53 +41,64 @@ const Footer = () => {
               )}
               <span className="text-xl font-display font-bold text-white">{siteName}</span>
             </Link>
-            <p className="text-sm text-gray-400">
-              Find the best PG accommodations near your college in Mangalore. 
-              Comfortable, affordable, and secure stays for students.
+            <p className="text-sm text-gray-600 leading-relaxed max-w-[210px]">
+              The smartest way to find student PG accommodation in Mangalore.
             </p>
           </div>
 
+          {/* Navigation */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/" className="hover:text-primary-500 transition-colors">Home</Link></li>
-              <li><Link to="/pgs" className="hover:text-primary-500 transition-colors">Find PGs</Link></li>
-              <li><Link to="/register" className="hover:text-primary-500 transition-colors">Sign Up</Link></li>
-              <li><Link to="/login" className="hover:text-primary-500 transition-colors">Login</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-white font-semibold mb-4">Popular Areas</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/pgs?area=Surathkal" className="hover:text-primary-500 transition-colors">Surathkal</Link></li>
-              <li><Link to="/pgs?area=Hampankatta" className="hover:text-primary-500 transition-colors">Hampankatta</Link></li>
-              <li><Link to="/pgs?area=Kadri" className="hover:text-primary-500 transition-colors">Kadri</Link></li>
-              <li><Link to="/pgs?area=Bejai" className="hover:text-primary-500 transition-colors">Bejai</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-white font-semibold mb-4">Contact Us</h3>
+            <h3 className="text-white text-xs font-semibold uppercase tracking-widest mb-5">Navigation</h3>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-center space-x-3">
-                <MapPin className="w-4 h-4 text-primary-500" />
+              {[['/', 'Home'], ['/pgs', 'Find PGs'], ['/register', 'Sign Up'], ['/login', 'Login']].map(([to, label]) => (
+                <li key={to}>
+                  <Link to={to} className="hover:text-primary-400 transition-colors">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Popular Areas */}
+          <div>
+            <h3 className="text-white text-xs font-semibold uppercase tracking-widest mb-5">Popular Areas</h3>
+            <ul className="space-y-3 text-sm">
+              {['Surathkal', 'Hampankatta', 'Kadri', 'Bejai'].map(area => (
+                <li key={area}>
+                  <Link to={`/pgs?area=${area}`} className="hover:text-primary-400 transition-colors">
+                    {area}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h3 className="text-white text-xs font-semibold uppercase tracking-widest mb-5">Contact</h3>
+            <ul className="space-y-4 text-sm">
+              <li className="flex items-start gap-3">
+                <MapPin className="w-4 h-4 text-primary-500 mt-0.5 flex-shrink-0" />
                 <span>Mangalore, Karnataka, India</span>
               </li>
-              <li className="flex items-center space-x-3">
-                <Phone className="w-4 h-4 text-primary-500" />
+              <li className="flex items-center gap-3">
+                <Phone className="w-4 h-4 text-primary-500 flex-shrink-0" />
                 <span>{contact.contactPhone}</span>
               </li>
-              <li className="flex items-center space-x-3">
-                <Mail className="w-4 h-4 text-primary-500" />
+              <li className="flex items-center gap-3">
+                <Mail className="w-4 h-4 text-primary-500 flex-shrink-0" />
                 <span>{contact.contactEmail}</span>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-500">
-          <p>&copy; {new Date().getFullYear()} StayNear. All rights reserved.</p>
+        <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-white/[0.05] gap-3">
+          <p className="text-xs text-gray-700">
+            &copy; {new Date().getFullYear()} {siteName}. All rights reserved.
+          </p>
+          <p className="text-xs text-gray-700">Made with ♥ for Mangalore students</p>
         </div>
       </div>
     </footer>

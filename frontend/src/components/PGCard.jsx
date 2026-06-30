@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { MapPin, Star, Heart, Utensils, Snowflake, Users } from 'lucide-react';
+import { MapPin, Star, Heart, Utensils, Snowflake, Users, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -33,89 +33,112 @@ const PGCard = ({ pg, onRemoveFavorite }) => {
     }
   };
 
+  const genderColor = {
+    boys: 'bg-blue-500/85',
+    girls: 'bg-pink-500/85',
+    'co-ed': 'bg-violet-500/85',
+  }[pg.gender] || 'bg-violet-500/85';
+
+  const genderLabel = {
+    boys: 'Boys',
+    girls: 'Girls',
+    'co-ed': 'Co-Ed',
+  }[pg.gender] || pg.gender;
+
   return (
-    <Link to={`/pg/${pg._id}`} className="card-hover group">
-      <div className="relative">
-        <div className="aspect-[4/3] overflow-hidden">
-          <img
-            src={pg.images?.[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800'}
-            alt={pg.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-          />
+    <Link to={`/pg/${pg._id}`} className="card-hover group block">
+      {/* Image */}
+      <div className="relative aspect-[4/3] overflow-hidden">
+        <img
+          src={pg.images?.[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800'}
+          alt={pg.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+        />
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+
+        {/* Top-left badges */}
+        <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
+          {pg.featured && (
+            <span className="bg-gold-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
+              ✦ Featured
+            </span>
+          )}
+          <span className={`${genderColor} text-white text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm`}>
+            {genderLabel}
+          </span>
         </div>
-        <button
-          onClick={handleFavorite}
-          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-          className={`absolute top-3 right-3 p-2 rounded-full transition-all ${
-            isFavorite
-              ? 'bg-red-500 text-white'
-              : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
-          }`}
-        >
-          <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
-        </button>
-        {pg.featured && (
-          <span className="absolute top-3 left-3 bg-gradient-to-r from-accent-500 to-accent-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
-            Featured
-          </span>
-        )}
-        <div className="absolute bottom-3 left-3 flex gap-2">
-          <span className={`px-2 py-1 rounded-lg text-xs font-medium ${
-            pg.gender === 'boys' 
-              ? 'bg-blue-500/90 text-white' 
-              : pg.gender === 'girls' 
-                ? 'bg-pink-500/90 text-white' 
-                : 'bg-purple-500/90 text-white'
-          }`}>
-            {pg.gender === 'co-ed' ? 'Co-Ed' : pg.gender === 'boys' ? 'Boys' : 'Girls'}
-          </span>
+
+        {/* Bottom-left amenity tags */}
+        <div className="absolute bottom-3 left-3 flex gap-1.5">
           {pg.foodIncluded && (
-            <span className="px-2 py-1 rounded-lg text-xs font-medium bg-green-500/90 text-white flex items-center gap-1">
+            <span className="bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded-lg flex items-center gap-1">
               <Utensils className="w-3 h-3" /> Food
             </span>
           )}
           {pg.acAvailable && (
-            <span className="px-2 py-1 rounded-lg text-xs font-medium bg-cyan-500/90 text-white flex items-center gap-1">
+            <span className="bg-cyan-500/90 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded-lg flex items-center gap-1">
               <Snowflake className="w-3 h-3" /> AC
             </span>
           )}
         </div>
-      </div>
 
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="font-semibold text-lg text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors line-clamp-1">
-            {pg.name}
-          </h3>
-          <div className="flex items-center gap-1 text-sm">
-            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-            <span className="font-medium">{pg.rating?.toFixed(1) || 'New'}</span>
-          </div>
+        {/* Bottom-right rating */}
+        <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-white/95 dark:bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1 shadow-sm">
+          <Star className="w-3.5 h-3.5 text-gold-500 fill-current" />
+          <span className="text-xs font-semibold text-gray-800 dark:text-white">
+            {pg.rating?.toFixed(1) || 'New'}
+          </span>
         </div>
 
-        <div className="flex items-center text-gray-500 dark:text-gray-400 text-sm mb-3">
-          <MapPin className="w-4 h-4 mr-1" />
+        {/* Favorite button */}
+        <button
+          onClick={handleFavorite}
+          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 shadow-md ${
+            isFavorite
+              ? 'bg-red-500 text-white'
+              : 'bg-white/90 backdrop-blur-sm text-gray-500 hover:text-red-500 hover:bg-white'
+          }`}
+        >
+          <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="p-4 md:p-5">
+        <h3 className="font-semibold text-base text-gray-900 dark:text-white group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors line-clamp-1 mb-1.5">
+          {pg.name}
+        </h3>
+
+        <div className="flex items-center text-gray-400 dark:text-gray-500 text-sm mb-3">
+          <MapPin className="w-3.5 h-3.5 mr-1 flex-shrink-0 text-gray-300 dark:text-gray-600" />
           <span className="line-clamp-1">{pg.area}, Mangalore</span>
         </div>
 
-        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
+        <div className="flex items-center gap-3 text-xs text-gray-400 mb-4">
           <span className="flex items-center gap-1">
-            <Users className="w-4 h-4" />
+            <Users className="w-3.5 h-3.5" />
             {pg.sharingType} sharing
           </span>
           {pg.amenities?.includes('WiFi') && (
-            <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+            <span className="text-primary-500 dark:text-primary-400 font-medium">
               WiFi
             </span>
           )}
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
-          <div>
-            <span className="text-2xl font-bold text-primary-500">₹{pg.rent?.toLocaleString()}</span>
-            <span className="text-gray-500 text-sm">/month</span>
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/[0.06]">
+          <div className="flex items-baseline gap-1">
+            <span className="text-xl font-bold text-gray-900 dark:text-white">
+              ₹{pg.rent?.toLocaleString()}
+            </span>
+            <span className="text-xs text-gray-400">/mo</span>
           </div>
-          <span className="text-sm text-gray-500">₹{pg.deposit?.toLocaleString()} deposit</span>
+          <div className="flex items-center gap-1 text-primary-500 dark:text-primary-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            View <ArrowRight className="w-4 h-4" />
+          </div>
         </div>
       </div>
     </Link>

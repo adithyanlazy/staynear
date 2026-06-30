@@ -1,17 +1,24 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, Home, Heart, User, LogOut, Shield, Sun, Moon } from 'lucide-react';
+import { Menu, X, Heart, User, LogOut, Shield, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import api from '../utils/api';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [siteLogo, setSiteLogo] = useState('');
   const [siteName, setSiteName] = useState('StayNear');
   const { darkMode, toggleDarkMode } = useTheme();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     const fetchLogo = async () => {
@@ -32,94 +39,133 @@ const Navbar = () => {
     setIsOpen(false);
   };
 
+  const linkClass = scrolled
+    ? 'text-gray-600 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400'
+    : 'text-white/70 hover:text-white';
+
+  const iconBtnClass = scrolled
+    ? 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/8'
+    : 'text-white/60 hover:text-white hover:bg-white/10';
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200 dark:border-gray-700">
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? 'bg-white/90 dark:bg-[#030e0d]/90 backdrop-blur-xl border-b border-gray-200/50 dark:border-white/[0.07] shadow-sm'
+          : 'bg-transparent border-b border-transparent'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-2">
+
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2.5">
             {siteLogo ? (
-              <img src={siteLogo} alt={siteName} className="h-10 w-10 rounded-xl object-cover logo-dark" />
+              <img src={siteLogo} alt={siteName} className="h-9 w-9 rounded-xl object-cover logo-dark" />
             ) : (
-              <img src="/staynear-logo.png" alt={siteName} className="h-10 w-10 logo-dark" />
+              <img src="/staynear-logo.png" alt={siteName} className="h-9 w-9 logo-dark" />
             )}
-            <span className="text-xl font-display font-bold gradient-text">{siteName}</span>
+            <span className={`text-xl font-display font-bold transition-colors duration-300 ${
+              scrolled ? 'text-gray-900 dark:text-white' : 'text-white'
+            }`}>
+              {siteName}
+            </span>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors font-medium">
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-7">
+            <Link to="/" className={`text-sm font-medium transition-colors duration-200 ${linkClass}`}>
               Home
             </Link>
-            <Link to="/pgs" className="text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors font-medium">
+            <Link to="/pgs" className={`text-sm font-medium transition-colors duration-200 ${linkClass}`}>
               Find PGs
             </Link>
             {user && (
-              <Link to="/favorites" className="text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors font-medium flex items-center gap-1">
+              <Link to="/favorites" className={`text-sm font-medium transition-colors duration-200 flex items-center gap-1.5 ${linkClass}`}>
                 <Heart className="w-4 h-4" />
                 Favorites
               </Link>
             )}
             {user?.role === 'admin' && (
-              <Link to="/admin" className="text-gray-700 dark:text-gray-300 hover:text-primary-500 transition-colors font-medium flex items-center gap-1">
+              <Link to="/admin" className={`text-sm font-medium transition-colors duration-200 flex items-center gap-1.5 ${linkClass}`}>
                 <Shield className="w-4 h-4" />
                 Admin
               </Link>
             )}
           </div>
 
-          <div className="hidden md:flex items-center space-x-4">
+          {/* Desktop actions */}
+          <div className="hidden md:flex items-center gap-3">
             <button
               onClick={toggleDarkMode}
               aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className={`p-2 rounded-xl transition-all duration-200 ${iconBtnClass}`}
             >
               {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
 
             {user ? (
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
                     <User className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-sm font-medium">{user.name}</span>
+                  <span className={`text-sm font-medium transition-colors ${
+                    scrolled ? 'text-gray-900 dark:text-white' : 'text-white'
+                  }`}>
+                    {user.name}
+                  </span>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center space-x-1 text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors"
+                  className={`flex items-center gap-1.5 text-sm transition-colors ${
+                    scrolled ? 'text-gray-500 dark:text-gray-400 hover:text-red-500' : 'text-white/50 hover:text-white'
+                  }`}
                 >
                   <LogOut className="w-4 h-4" />
-                  <span className="text-sm">Logout</span>
+                  Logout
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-3">
-                <Link to="/login" className="btn-secondary text-sm py-2 px-4">
+              <div className="flex items-center gap-2.5">
+                <Link
+                  to="/login"
+                  className={`text-sm font-semibold px-4 py-2 rounded-xl transition-all duration-200 ${
+                    scrolled
+                      ? 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/8'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
                   Login
                 </Link>
-                <Link to="/register" className="btn-primary text-sm py-2 px-4">
+                <Link
+                  to="/register"
+                  className="text-sm font-semibold px-5 py-2 rounded-xl bg-primary-600 hover:bg-primary-500 text-white transition-all duration-200 shadow-glow-primary"
+                >
                   Sign Up
                 </Link>
               </div>
             )}
           </div>
 
+          {/* Mobile controls */}
           <div className="flex items-center gap-1 md:hidden">
             {user && (
-              <Link to="/favorites" className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <Heart className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              <Link to="/favorites" className={`p-2 rounded-xl transition-all ${iconBtnClass}`}>
+                <Heart className="w-5 h-5" />
               </Link>
             )}
             <button
               onClick={toggleDarkMode}
-              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              aria-label="Toggle theme"
+              className={`p-2 rounded-xl transition-all ${iconBtnClass}`}
             >
               {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
               aria-label={isOpen ? 'Close menu' : 'Open menu'}
-              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className={`p-2 rounded-xl transition-all ${iconBtnClass}`}
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -127,20 +173,21 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* Mobile menu */}
       {isOpen && (
-        <div className="md:hidden glass border-t border-gray-200 dark:border-gray-700 animate-slide-down">
-          <div className="px-4 py-4 space-y-3">
+        <div className="md:hidden bg-white dark:bg-[#030e0d] border-t border-gray-100 dark:border-white/[0.07] animate-slide-down">
+          <div className="px-4 py-4 space-y-1">
             <Link
               to="/"
               onClick={() => setIsOpen(false)}
-              className="block py-2 text-gray-700 dark:text-gray-300 hover:text-primary-500 font-medium"
+              className="block px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-primary-500 transition-colors"
             >
               Home
             </Link>
             <Link
               to="/pgs"
               onClick={() => setIsOpen(false)}
-              className="block py-2 text-gray-700 dark:text-gray-300 hover:text-primary-500 font-medium"
+              className="block px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-primary-500 transition-colors"
             >
               Find PGs
             </Link>
@@ -148,7 +195,7 @@ const Navbar = () => {
               <Link
                 to="/favorites"
                 onClick={() => setIsOpen(false)}
-                className="block py-2 text-gray-700 dark:text-gray-300 hover:text-primary-500 font-medium"
+                className="block px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-primary-500 transition-colors"
               >
                 Favorites
               </Link>
@@ -157,46 +204,48 @@ const Navbar = () => {
               <Link
                 to="/admin"
                 onClick={() => setIsOpen(false)}
-                className="block py-2 text-gray-700 dark:text-gray-300 hover:text-primary-500 font-medium"
+                className="block px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-primary-500 transition-colors"
               >
                 Admin Panel
               </Link>
             )}
-            <hr className="border-gray-200 dark:border-gray-700" />
-            {user ? (
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2 py-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" />
+
+            <div className="pt-3 border-t border-gray-100 dark:border-white/[0.07] mt-2">
+              {user ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 px-3 py-2">
+                    <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-medium text-sm">{user.name}</span>
                   </div>
-                  <span className="font-medium">{user.name}</span>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className="w-full btn-secondary text-sm py-2 flex items-center justify-center gap-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <Link
-                  to="/login"
-                  onClick={() => setIsOpen(false)}
-                  className="block btn-secondary text-sm py-2 text-center"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  onClick={() => setIsOpen(false)}
-                  className="block btn-primary text-sm py-2 text-center"
-                >
-                  Sign Up
-                </Link>
-              </div>
-            )}
+              ) : (
+                <div className="space-y-2 pt-1">
+                  <Link
+                    to="/login"
+                    onClick={() => setIsOpen(false)}
+                    className="block text-center px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={() => setIsOpen(false)}
+                    className="block text-center px-4 py-2.5 rounded-xl text-sm font-semibold bg-primary-600 hover:bg-primary-500 text-white transition-colors"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
