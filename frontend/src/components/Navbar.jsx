@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Heart, User, LogOut, Shield, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -55,7 +56,7 @@ const Navbar = () => {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         solid
-          ? 'bg-white/90 dark:bg-[#030e0d]/90 backdrop-blur-xl border-b border-gray-200/50 dark:border-white/[0.07] shadow-sm'
+          ? 'bg-white/90 dark:bg-surface/90 backdrop-blur-xl border-b border-gray-200/50 dark:border-white/[0.07] shadow-sm'
           : 'bg-transparent border-b border-transparent'
       }`}
     >
@@ -178,8 +179,14 @@ const Navbar = () => {
       </div>
 
       {/* Mobile menu */}
+      <AnimatePresence>
       {isOpen && (
-        <div className="md:hidden bg-white dark:bg-[#030e0d] border-t border-gray-100 dark:border-white/[0.07] animate-slide-down">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="md:hidden bg-white dark:bg-surface border-t border-gray-100 dark:border-white/[0.07]">
           <div className="px-4 py-4 space-y-1">
             <Link
               to="/"
@@ -251,8 +258,9 @@ const Navbar = () => {
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </nav>
   );
 };

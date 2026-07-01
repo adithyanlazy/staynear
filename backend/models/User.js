@@ -12,7 +12,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     unique: true,
     sparse: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please add a valid email']
+    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/, 'Please add a valid email']
   },
   phone: {
     type: String,
@@ -56,6 +56,8 @@ const UserSchema = new mongoose.Schema({
   },
   verificationOTP: String,
   verificationOTPExpiry: Date,
+  resetOTP: String,
+  resetOTPExpiry: Date,
   lastLogin: Date,
   loginCount: {
     type: Number,

@@ -4,6 +4,10 @@ const errorHandler = (err, req, res, next) => {
 
   console.error(err.stack);
 
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ success: false, message: 'Origin not allowed' });
+  }
+
   if (err.name === 'CastError') {
     error.message = 'Resource not found';
     return res.status(404).json({ success: false, message: error.message });

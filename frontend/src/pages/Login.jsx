@@ -4,8 +4,10 @@ import { Mail, Phone, Lock, Eye, EyeOff, Home } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const Login = () => {
+  usePageMeta('Login | StayNear');
   const [loginType, setLoginType] = useState('phone');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');

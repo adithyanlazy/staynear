@@ -3,8 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { User, Phone, Lock, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const Register = () => {
+  usePageMeta('Create Account | StayNear');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');

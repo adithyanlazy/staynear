@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MapPin, GraduationCap, IndianRupee } from 'lucide-react';
 import api from '../utils/api';
 import { COLLEGES, AREAS } from '../utils/constants';
@@ -10,6 +11,7 @@ const SearchBar = ({ variant = 'hero' }) => {
   const [minRent, setMinRent] = useState('');
   const [maxRent, setMaxRent] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const [colleges, setColleges] = useState(COLLEGES);
   const [areas, setAreas] = useState(AREAS);
   const navigate = useNavigate();
@@ -56,7 +58,33 @@ const SearchBar = ({ variant = 'hero' }) => {
   const handleSelect = (item) => {
     setQuery(item);
     setShowDropdown(false);
+    setActiveIndex(-1);
     navigate(`/pgs?${buildParams(item)}`);
+  };
+
+  const handleKeyDown = (e) => {
+    if (!showDropdown || filteredItems.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex(i => (i + 1) % filteredItems.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex(i => (i - 1 + filteredItems.length) % filteredItems.length);
+    } else if (e.key === 'Enter' && activeIndex >= 0) {
+      e.preventDefault();
+      handleSelect(filteredItems[activeIndex]);
+    } else if (e.key === 'Escape') {
+      setShowDropdown(false);
+      setActiveIndex(-1);
+    }
+  };
+
+  const dropdownMotion = {
+    initial: { opacity: 0, y: -6, scaleY: 0.96 },
+    animate: { opacity: 1, y: 0, scaleY: 1 },
+    exit: { opacity: 0, y: -6, scaleY: 0.98 },
+    transition: { duration: 0.15, ease: 'easeOut' },
+    style: { originY: 0 },
   };
 
   if (variant === 'compact') {
@@ -96,34 +124,46 @@ const SearchBar = ({ variant = 'hero' }) => {
             onChange={(e) => {
               setQuery(e.target.value);
               setShowDropdown(true);
+              setActiveIndex(-1);
             }}
+            onKeyDown={handleKeyDown}
             onFocus={() => setShowDropdown(true)}
             onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
             placeholder={searchType === 'college' ? 'Select your college...' : 'Choose an area...'}
             className="input-field pl-10"
           />
-          {showDropdown && filteredItems.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-72 overflow-auto pb-2">
-              {filteredItems.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    handleSelect(item);
-                  }}
-                  className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors"
-                >
-                  {searchType === 'college' ? (
-                    <GraduationCap className="w-5 h-5 text-primary-500" />
-                  ) : (
-                    <MapPin className="w-5 h-5 text-accent-500" />
-                  )}
-                  <span>{item}</span>
-                </button>
-              ))}
-            </div>
-          )}
+          <AnimatePresence>
+            {showDropdown && filteredItems.length > 0 && (
+              <motion.div
+                {...dropdownMotion}
+                role="listbox"
+                className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-72 overflow-auto pb-2"
+              >
+                {filteredItems.map((item, idx) => (
+                  <button
+                    key={item}
+                    type="button"
+                    role="option"
+                    aria-selected={idx === activeIndex}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleSelect(item);
+                    }}
+                    className={`w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors ${
+                      idx === activeIndex ? 'bg-gray-50 dark:bg-gray-700' : ''
+                    }`}
+                  >
+                    {searchType === 'college' ? (
+                      <GraduationCap className="w-5 h-5 text-primary-500" />
+                    ) : (
+                      <MapPin className="w-5 h-5 text-accent-500" />
+                    )}
+                    <span>{item}</span>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         <button type="submit" className="btn-primary flex items-center gap-2">
           <Search className="w-5 h-5" />
@@ -172,34 +212,46 @@ const SearchBar = ({ variant = 'hero' }) => {
               onChange={(e) => {
                 setQuery(e.target.value);
                 setShowDropdown(true);
+                setActiveIndex(-1);
               }}
+              onKeyDown={handleKeyDown}
               onFocus={() => setShowDropdown(true)}
               onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
               placeholder={searchType === 'college' ? 'Select your college...' : 'Choose an area...'}
               className="w-full pl-12 pr-4 py-4 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 outline-none"
             />
-            {showDropdown && filteredItems.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-72 overflow-auto pb-2">
-                {filteredItems.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onMouseDown={(e) => {
-                      e.preventDefault();
-                      handleSelect(item);
-                    }}
-                    className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors"
-                  >
-                    {searchType === 'college' ? (
-                      <GraduationCap className="w-5 h-5 text-primary-500" />
-                    ) : (
-                      <MapPin className="w-5 h-5 text-accent-500" />
-                    )}
-                    <span>{item}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+            <AnimatePresence>
+              {showDropdown && filteredItems.length > 0 && (
+                <motion.div
+                  {...dropdownMotion}
+                  role="listbox"
+                  className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 max-h-72 overflow-auto pb-2"
+                >
+                  {filteredItems.map((item, idx) => (
+                    <button
+                      key={item}
+                      type="button"
+                      role="option"
+                      aria-selected={idx === activeIndex}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        handleSelect(item);
+                      }}
+                      className={`w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors ${
+                        idx === activeIndex ? 'bg-gray-50 dark:bg-gray-700' : ''
+                      }`}
+                    >
+                      {searchType === 'college' ? (
+                        <GraduationCap className="w-5 h-5 text-primary-500" />
+                      ) : (
+                        <MapPin className="w-5 h-5 text-accent-500" />
+                      )}
+                      <span>{item}</span>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <button type="submit" className="btn-primary flex items-center gap-2">

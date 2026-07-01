@@ -7,10 +7,15 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/error');
+const { getSettings } = require('./utils/settingsCache');
 
 dotenv.config();
 
 const app = express();
+
+// Behind Render's proxy: lets express-rate-limit key off the real client IP
+// instead of a spoofable X-Forwarded-For header.
+app.set('trust proxy', 1);
 
 app.use(helmet());
 
@@ -19,7 +24,6 @@ const limiter = rateLimit({
   max: 500,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.headers['x-forwarded-for'] || req.ip,
   message: { success: false, message: 'Too many requests. Please wait a few minutes.' },
 });
 app.use('/api', limiter);
@@ -28,7 +32,6 @@ const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 50,
   message: { success: false, message: 'Too many attempts. Please try again later.' },
-  keyGenerator: (req) => req.headers['x-forwarded-for'] || req.ip,
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/login-phone', authLimiter);
@@ -37,6 +40,7 @@ app.use('/api/auth/register-phone', authLimiter);
 app.use('/api/auth/verify-email', authLimiter);
 app.use('/api/auth/resend-verification', authLimiter);
 app.use('/api/auth/forgot-password', authLimiter);
+app.use('/api/auth/reset-password', authLimiter);
 
 app.use(cors({
   origin: function(origin, callback) {
@@ -59,9 +63,49 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Strip Mongo operators from user input so query objects like
+// { "phone": { "$ne": null } } can't reach the database.
+const stripUnsafeKeys = (obj) => {
+  if (!obj || typeof obj !== 'object') return;
+  for (const key of Object.keys(obj)) {
+    if (key.startsWith('$') || key.includes('.')) {
+      delete obj[key];
+    } else {
+      stripUnsafeKeys(obj[key]);
+    }
+  }
+};
+app.use((req, res, next) => {
+  stripUnsafeKeys(req.body);
+  stripUnsafeKeys(req.query);
+  stripUnsafeKeys(req.params);
+  next();
+});
+
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+// Maintenance mode: block public API when enabled. Health, auth, and admin
+// stay reachable so an admin can still log in and switch it back off.
+app.use(async (req, res, next) => {
+  if (
+    req.path === '/api/health' ||
+    req.path.startsWith('/api/auth') ||
+    req.path.startsWith('/api/admin')
+  ) {
+    return next();
+  }
+  try {
+    const settings = await getSettings();
+    if (settings.maintenanceMode) {
+      return res.status(503).json({ success: false, message: 'Site is under maintenance. Please check back soon.' });
+    }
+  } catch (err) {
+    // DB hiccup while checking the flag shouldn't take the whole API down.
+  }
+  next();
+});
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/pgs', require('./routes/pg'));
@@ -73,25 +117,6 @@ app.use('/api/admin', require('./routes/admin'));
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
-
-const Settings = require('./models/Settings');
-
-const settingsCache = { data: null, ts: 0 };
-const SETTINGS_TTL = 60 * 1000;
-
-const getSettings = async () => {
-  const now = Date.now();
-  if (settingsCache.data && now - settingsCache.ts < SETTINGS_TTL) {
-    return settingsCache.data;
-  }
-  let settings = await Settings.findOne();
-  if (!settings) {
-    settings = await Settings.create({});
-  }
-  settingsCache.data = settings;
-  settingsCache.ts = now;
-  return settings;
-};
 
 app.get('/api/suggestions', async (req, res) => {
   try {

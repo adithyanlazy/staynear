@@ -12,7 +12,8 @@ const {
   addFavorite,
   removeFavorite,
   getFavorites,
-  forgotPassword
+  forgotPassword,
+  resetPassword
 } = require('../controllers/auth');
 const { protect } = require('../middleware/auth');
 
@@ -28,5 +29,6 @@ router.post('/favorites/:pgId', protect, addFavorite);
 router.delete('/favorites/:pgId', protect, removeFavorite);
 router.get('/favorites', protect, getFavorites);
 router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 module.exports = router;

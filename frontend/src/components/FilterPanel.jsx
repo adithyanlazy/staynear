@@ -1,3 +1,4 @@
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, SlidersHorizontal } from 'lucide-react';
 import { AREAS, GENDER_OPTIONS, SHARING_OPTIONS, SORT_OPTIONS } from '../utils/constants';
 
@@ -33,18 +34,26 @@ const FilterPanel = ({ filters, setFilters, isOpen, setIsOpen }) => {
         <SlidersHorizontal className="w-6 h-6" />
       </button>
 
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 lg:hidden" onClick={() => setIsOpen(false)} />
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-50 lg:hidden"
+            onClick={() => setIsOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
-      <div className={`
-        fixed lg:sticky top-0 lg:top-24 left-0 h-full lg:h-auto w-80 lg:w-72
+      <motion.div
+        initial={false}
+        animate={{ x: isOpen ? 0 : '-110%' }}
+        transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+        className="fixed lg:sticky top-0 lg:top-24 left-0 h-full lg:h-auto w-80 lg:w-72
         bg-white dark:bg-gray-800 z-50 lg:z-0
         overflow-y-auto lg:overflow-visible
-        transform transition-transform duration-300
-        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        lg:rounded-2xl lg:shadow-lg lg:border lg:border-gray-200 dark:lg:border-gray-700
-      `}>
+        lg:rounded-2xl lg:shadow-lg lg:border lg:border-gray-200 dark:lg:border-gray-700">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -187,7 +196,7 @@ const FilterPanel = ({ filters, setFilters, isOpen, setIsOpen }) => {
             Show Results
           </button>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 };

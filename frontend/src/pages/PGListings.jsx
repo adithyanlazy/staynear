@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, SlidersHorizontal, ArrowUp } from 'lucide-react';
+import { staggerContainer, staggerItem } from '../utils/motion';
+import { usePageMeta } from '../hooks/usePageMeta';
 import PGCard from '../components/PGCard';
 import FilterPanel from '../components/FilterPanel';
 import LoadingSkeleton from '../components/LoadingSkeleton';
@@ -15,6 +18,13 @@ const PGListings = () => {
   const [total, setTotal] = useState(0);
   const [pagination, setPagination] = useState({});
   const [filterOpen, setFilterOpen] = useState(false);
+  const [showTopBtn, setShowTopBtn] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setShowTopBtn(window.scrollY > 600);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const [filters, setFilters] = useState({
     area: searchParams.get('area') || '',
@@ -29,11 +39,28 @@ const PGListings = () => {
     page: 1,
   });
 
+  const activeFilterCount = ['area', 'gender', 'foodIncluded', 'acAvailable', 'sharingType', 'collegeNearby']
+    .filter(key => filters[key]).length + ((filters.minRent || filters.maxRent) ? 1 : 0);
+
+  const metaScope = filters.collegeNearby
+    ? `PGs near ${filters.collegeNearby}`
+    : filters.area
+      ? `PGs in ${filters.area}, Mangalore`
+      : 'PG Accommodations in Mangalore';
+  usePageMeta(
+    `${metaScope} | StayNear`,
+    `Browse ${metaScope.toLowerCase()} — filter by budget, sharing type, food and AC. Verified listings with student reviews.`
+  );
+
   useEffect(() => {
     setFilters(prev => ({
       ...prev,
       area: searchParams.get('area') || '',
       collegeNearby: searchParams.get('collegeNearby') || '',
+      gender: searchParams.get('gender') || '',
+      foodIncluded: searchParams.get('foodIncluded') || '',
+      acAvailable: searchParams.get('acAvailable') || '',
+      sharingType: searchParams.get('sharingType') || '',
       minRent: searchParams.get('minRent') || '',
       maxRent: searchParams.get('maxRent') || '',
       page: 1,
@@ -50,7 +77,7 @@ const PGListings = () => {
         });
 
         const res = await api.get(`/pgs?${params.toString()}`);
-        setPGs(res.data.data);
+        setPGs(prev => filters.page > 1 ? [...prev, ...res.data.data] : res.data.data);
         setTotal(res.data.total);
         setPagination(res.data.pagination);
       } catch (err) {
@@ -97,36 +124,43 @@ const PGListings = () => {
               >
                 <SlidersHorizontal className="w-5 h-5" />
                 Filters
+                {activeFilterCount > 0 && (
+                  <span className="ml-1 min-w-[20px] h-5 px-1.5 rounded-full bg-primary-500 text-white text-xs font-semibold flex items-center justify-center">
+                    {activeFilterCount}
+                  </span>
+                )}
               </button>
             </div>
 
             {filters.area || filters.collegeNearby || filters.gender || filters.foodIncluded || filters.acAvailable || filters.sharingType || filters.minRent || filters.maxRent ? (
-              <div className="flex flex-wrap gap-2 mb-6">
-                {filters.area && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm">
-                    {filters.area}
-                    <button onClick={() => setFilters(prev => ({ ...prev, area: '' }))} className="ml-1 hover:text-primary-900">×</button>
-                  </span>
-                )}
-                {filters.collegeNearby && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-secondary-100 dark:bg-secondary-900/30 text-secondary-700 dark:text-secondary-300 rounded-full text-sm">
-                    {filters.collegeNearby}
-                    <button onClick={() => setFilters(prev => ({ ...prev, collegeNearby: '' }))} className="ml-1 hover:text-secondary-900">×</button>
-                  </span>
-                )}
-                {filters.gender && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300 rounded-full text-sm">
-                    {filters.gender === 'co-ed' ? 'Co-Ed' : filters.gender}
-                    <button onClick={() => setFilters(prev => ({ ...prev, gender: '' }))} className="ml-1 hover:text-accent-900">×</button>
-                  </span>
-                )}
-                {(filters.minRent || filters.maxRent) && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm">
-                    ₹{filters.minRent || '0'} – ₹{filters.maxRent || '∞'}
-                    <button onClick={() => setFilters(prev => ({ ...prev, minRent: '', maxRent: '' }))} className="ml-1 hover:text-green-900">×</button>
-                  </span>
-                )}
-              </div>
+              <motion.div layout className="flex flex-wrap gap-2 mb-6">
+                <AnimatePresence>
+                  {filters.area && (
+                    <motion.span key="chip-area" layout initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm">
+                      {filters.area}
+                      <button onClick={() => setFilters(prev => ({ ...prev, area: '' }))} className="ml-1 hover:text-primary-900">×</button>
+                    </motion.span>
+                  )}
+                  {filters.collegeNearby && (
+                    <motion.span key="chip-college" layout initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} className="inline-flex items-center gap-1 px-3 py-1 bg-secondary-100 dark:bg-secondary-900/30 text-secondary-700 dark:text-secondary-300 rounded-full text-sm">
+                      {filters.collegeNearby}
+                      <button onClick={() => setFilters(prev => ({ ...prev, collegeNearby: '' }))} className="ml-1 hover:text-secondary-900">×</button>
+                    </motion.span>
+                  )}
+                  {filters.gender && (
+                    <motion.span key="chip-gender" layout initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} className="inline-flex items-center gap-1 px-3 py-1 bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300 rounded-full text-sm">
+                      {filters.gender === 'co-ed' ? 'Co-Ed' : filters.gender}
+                      <button onClick={() => setFilters(prev => ({ ...prev, gender: '' }))} className="ml-1 hover:text-accent-900">×</button>
+                    </motion.span>
+                  )}
+                  {(filters.minRent || filters.maxRent) && (
+                    <motion.span key="chip-rent" layout initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm">
+                      ₹{filters.minRent || '0'} – ₹{filters.maxRent || '∞'}
+                      <button onClick={() => setFilters(prev => ({ ...prev, minRent: '', maxRent: '' }))} className="ml-1 hover:text-green-900">×</button>
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             ) : null}
 
             {loading ? (
@@ -166,11 +200,18 @@ const PGListings = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <motion.div
+                  variants={staggerContainer}
+                  initial="initial"
+                  animate="animate"
+                  className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+                >
                   {pgs.map(pg => (
-                    <PGCard key={pg._id} pg={pg} />
+                    <motion.div key={pg._id} variants={staggerItem}>
+                      <PGCard pg={pg} />
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
 
                 {pagination.next && (
                   <div className="flex justify-center mt-8">
@@ -196,6 +237,22 @@ const PGListings = () => {
           setIsOpen={setFilterOpen}
         />
       </div>
+
+      {/* Back to top — sits above the mobile filter FAB */}
+      <AnimatePresence>
+        {showTopBtn && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            aria-label="Back to top"
+            className="fixed right-6 bottom-24 lg:bottom-6 z-40 p-3 rounded-full bg-white dark:bg-surface-card border border-gray-200 dark:border-white/10 shadow-lg text-gray-600 dark:text-gray-300 hover:text-primary-500"
+          >
+            <ArrowUp className="w-5 h-5" />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

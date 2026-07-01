@@ -3,18 +3,34 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
 const { sendOTP: sendEmailOTP } = require('../utils/email');
+const { getSettings } = require('../utils/settingsCache');
+
+// Reject non-string values (arrays, query objects) before they reach Mongo.
+const isNonEmptyString = (v) => typeof v === 'string' && v.length > 0;
+
+const isEmailConfigured = () =>
+  process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD
+  && process.env.GMAIL_USER !== 'your_gmail@gmail.com';
 
 exports.register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
+
+    if (!isNonEmptyString(name) || !isNonEmptyString(email) || !isNonEmptyString(password)) {
+      return res.status(400).json({ success: false, message: 'Please provide name, email, and password' });
+    }
+
+    const settings = await getSettings();
+    if (settings.allowRegistrations === false) {
+      return res.status(403).json({ success: false, message: 'Registrations are currently disabled' });
+    }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
-    const emailConfigured = process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD
-      && process.env.GMAIL_USER !== 'your_gmail@gmail.com';
+    const emailConfigured = isEmailConfigured();
 
     let user;
     let requiresVerification = false;
@@ -66,8 +82,13 @@ exports.registerPhone = async (req, res, next) => {
   try {
     const { name, phone, password } = req.body;
 
-    if (!name || !phone || !password) {
+    if (!isNonEmptyString(name) || !isNonEmptyString(phone) || !isNonEmptyString(password)) {
       return res.status(400).json({ success: false, message: 'Please provide name, phone, and password' });
+    }
+
+    const settings = await getSettings();
+    if (settings.allowRegistrations === false) {
+      return res.status(403).json({ success: false, message: 'Registrations are currently disabled' });
     }
 
     const existingUser = await User.findOne({ phone });
@@ -101,7 +122,7 @@ exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
+    if (!isNonEmptyString(email) || !isNonEmptyString(password)) {
       return res.status(400).json({ success: false, message: 'Please provide email and password' });
     }
 
@@ -117,9 +138,7 @@ exports.login = async (req, res, next) => {
     }
 
     if (!user.emailVerified) {
-      const emailConfigured = process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD
-        && process.env.GMAIL_USER !== 'your_gmail@gmail.com';
-      if (emailConfigured) {
+      if (isEmailConfigured()) {
         return res.status(403).json({
           success: false,
           message: 'Please verify your email first',
@@ -145,7 +164,7 @@ exports.loginPhone = async (req, res, next) => {
   try {
     const { phone, password } = req.body;
 
-    if (!phone || !password) {
+    if (!isNonEmptyString(phone) || !isNonEmptyString(password)) {
       return res.status(400).json({ success: false, message: 'Please provide phone and password' });
     }
 
@@ -175,7 +194,7 @@ exports.verifyEmail = async (req, res, next) => {
   try {
     const { email, otp } = req.body;
 
-    if (!email || !otp) {
+    if (!isNonEmptyString(email) || !isNonEmptyString(otp)) {
       return res.status(400).json({ success: false, message: 'Please provide email and OTP' });
     }
 
@@ -213,7 +232,7 @@ exports.resendVerification = async (req, res, next) => {
   try {
     const { email } = req.body;
 
-    if (!email) {
+    if (!isNonEmptyString(email)) {
       return res.status(400).json({ success: false, message: 'Please provide email' });
     }
 
@@ -323,19 +342,63 @@ exports.getFavorites = async (req, res) => {
   }
 };
 
+// Step 1: request a reset code. Sends a one-time code to the account's email.
+// Response is identical whether or not the account exists, so the endpoint
+// can't be used to enumerate registered emails.
 exports.forgotPassword = async (req, res, next) => {
   try {
-    const { phone, newPassword } = req.body;
-    if (!phone || !newPassword) {
-      return res.status(400).json({ success: false, message: 'Please provide phone and new password' });
+    const { email } = req.body;
+    if (!isNonEmptyString(email)) {
+      return res.status(400).json({ success: false, message: 'Please provide your email' });
     }
 
-    const user = await User.findOne({ phone }).select('+password');
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'No account found with this phone number' });
+    if (!isEmailConfigured()) {
+      return res.status(503).json({
+        success: false,
+        message: 'Password reset is temporarily unavailable. Please contact support.',
+      });
+    }
+
+    const user = await User.findOne({ email });
+    if (user) {
+      const otp = crypto.randomInt(100000, 999999).toString();
+      await User.findByIdAndUpdate(user._id, {
+        resetOTP: otp,
+        resetOTPExpiry: new Date(Date.now() + 10 * 60 * 1000),
+      });
+      await sendEmailOTP(email, otp);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'If an account exists with this email, a reset code has been sent.',
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Step 2: verify the emailed code and set the new password.
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    if (!isNonEmptyString(email) || !isNonEmptyString(otp) || !isNonEmptyString(newPassword)) {
+      return res.status(400).json({ success: false, message: 'Please provide email, code, and new password' });
+    }
+
+    const user = await User.findOne({ email }).select('+password');
+    if (!user || !user.resetOTP || user.resetOTP !== otp) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired reset code' });
+    }
+
+    if (!user.resetOTPExpiry || new Date(user.resetOTPExpiry) < new Date()) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired reset code' });
     }
 
     user.password = newPassword;
+    user.resetOTP = null;
+    user.resetOTPExpiry = null;
+    user.tokenVersion = (user.tokenVersion || 0) + 1; // log out all existing sessions
     await user.save();
 
     res.status(200).json({ success: true, message: 'Password reset successful. You can now login.' });
@@ -360,6 +423,11 @@ const sendTokenResponse = (user, statusCode, res) => {
 
   const userObj = user.toObject ? user.toObject() : { ...user };
   delete userObj.password;
+  delete userObj.verificationOTP;
+  delete userObj.verificationOTPExpiry;
+  delete userObj.resetOTP;
+  delete userObj.resetOTPExpiry;
+  delete userObj.tokenVersion;
 
   res
     .status(statusCode)

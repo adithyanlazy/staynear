@@ -1,12 +1,18 @@
 const PG = require('../models/PG');
 const Review = require('../models/Review');
-const Settings = require('../models/Settings');
+const { getSettings } = require('../utils/settingsCache');
+
+// parseInt that rejects garbage like "abc" instead of producing NaN filters
+const toInt = (v) => {
+  const n = parseInt(v, 10);
+  return Number.isFinite(n) ? n : undefined;
+};
 
 const PG_FIELDS = [
   'name', 'description', 'rent', 'deposit', 'gender', 'foodIncluded',
   'acAvailable', 'sharingType', 'area', 'collegeNearby', 'address',
   'images', 'videos', 'amenities',
-  'contactNumber', 'contactName', 'featured', 'active'
+  'contactNumber', 'contactName', 'featured', 'active', 'location', 'available'
 ];
 
 const sanitizePGInput = (body) => {
@@ -30,25 +36,25 @@ exports.getPGs = async (req, res, next) => {
     if (req.query.sharingType) filter.sharingType = req.query.sharingType;
     if (req.query.collegeNearby) filter.collegeNearby = req.query.collegeNearby;
 
-    if (req.query.minRent || req.query.maxRent) {
+    const minRent = toInt(req.query.minRent);
+    const maxRent = toInt(req.query.maxRent);
+    if (minRent !== undefined || maxRent !== undefined) {
       filter.rent = {};
-      if (req.query.minRent) filter.rent.$gte = parseInt(req.query.minRent);
-      if (req.query.maxRent) filter.rent.$lte = parseInt(req.query.maxRent);
+      if (minRent !== undefined) filter.rent.$gte = minRent;
+      if (maxRent !== undefined) filter.rent.$lte = maxRent;
     }
 
     const sort = req.query.sort || '-createdAt';
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 12;
+    const page = Math.max(toInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(toInt(req.query.limit) || 12, 1), 50);
     const skip = (page - 1) * limit;
 
-    let query;
-    if (req.query.search) {
-      query = PG.find({ ...filter, $text: { $search: req.query.search } });
-    } else {
-      query = PG.find(filter);
-    }
+    const finalFilter = req.query.search
+      ? { ...filter, $text: { $search: req.query.search } }
+      : filter;
+    const query = PG.find(finalFilter);
 
-    const total = await PG.countDocuments(filter);
+    const total = await PG.countDocuments(finalFilter);
     const data = await query.sort(sort).skip(skip).limit(limit);
 
     const pagination = {};
@@ -162,10 +168,7 @@ exports.getSimilarPGs = async (req, res, next) => {
 exports.getStats = async (req, res, next) => {
   try {
     const totalPGs = await PG.countDocuments({ active: true });
-    let settings = await Settings.findOne();
-    if (!settings) {
-      settings = await Settings.create({});
-    }
+    const settings = await getSettings();
     const avgResult = await PG.aggregate([
       { $match: { active: true } },
       { $group: { _id: null, avgRent: { $avg: '$rent' } } }
@@ -188,8 +191,8 @@ exports.getStats = async (req, res, next) => {
 
 exports.getAllPGsAdmin = async (req, res, next) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 50;
+    const page = Math.max(toInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(toInt(req.query.limit) || 50, 1), 100);
     const skip = (page - 1) * limit;
 
     const total = await PG.countDocuments();
@@ -208,8 +211,8 @@ exports.getAllPGsAdmin = async (req, res, next) => {
 
 exports.getPopularAreas = async (req, res, next) => {
   try {
-    let settings = await Settings.findOne();
-    if (!settings || !settings.popularAreas || settings.popularAreas.length === 0) {
+    const settings = await getSettings();
+    if (!settings.popularAreas || settings.popularAreas.length === 0) {
       return res.status(200).json({
         success: true,
         data: [

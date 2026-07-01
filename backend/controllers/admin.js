@@ -2,6 +2,7 @@ const PG = require('../models/PG');
 const User = require('../models/User');
 const Review = require('../models/Review');
 const Settings = require('../models/Settings');
+const { invalidateSettings } = require('../utils/settingsCache');
 
 exports.getDashboardStats = async (req, res, next) => {
   try {
@@ -68,13 +69,22 @@ exports.getUsers = async (req, res, next) => {
       .limit(limit)
       .populate('favorites.pgId');
 
-    const usersWithMeta = await Promise.all(users.map(async (user) => {
-      const reviewCount = await Review.countDocuments({ user: user._id });
+    const reviewCounts = await Review.aggregate([
+      { $match: { user: { $in: users.map(u => u._id) } } },
+      { $group: { _id: '$user', count: { $sum: 1 } } },
+    ]);
+    const countByUser = new Map(reviewCounts.map(r => [r._id.toString(), r.count]));
+
+    const usersWithMeta = users.map(user => {
       const favorites = user.favorites
         .filter(f => f.pgId)
         .map(f => ({ ...f.pgId.toObject(), favoritedAt: f.favoritedAt }));
-      return { ...user.toObject(), reviewCount, favorites };
-    }));
+      return {
+        ...user.toObject(),
+        reviewCount: countByUser.get(user._id.toString()) || 0,
+        favorites,
+      };
+    });
 
     res.status(200).json({
       success: true,
@@ -208,6 +218,7 @@ exports.updateSettings = async (req, res, next) => {
       if (testimonials !== undefined) settings.testimonials = testimonials;
       await settings.save();
     }
+    invalidateSettings();
     res.status(200).json({ success: true, data: settings });
   } catch (err) {
     next(err);

@@ -1,28 +1,42 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, useInView, animate } from 'framer-motion';
 import {
   Search, MapPin, Star, Users, Building, Shield,
   ArrowRight, ChevronRight, GraduationCap, CheckCircle2, TrendingUp,
 } from 'lucide-react';
+import { heroContainer, heroItem, staggerContainer, staggerItem, fadeUp, viewportOnce } from '../utils/motion';
+import { usePageMeta } from '../hooks/usePageMeta';
 import SearchBar from '../components/SearchBar';
 import PGCard from '../components/PGCard';
 import LoadingSkeleton from '../components/LoadingSkeleton';
-import { useScrollAnimation } from '../hooks/useScrollAnimation';
-import { useCountUp } from '../hooks/useCountUp';
 import api from '../utils/api';
 
-const StatItem = ({ icon: Icon, value, label, isVisible }) => {
+const StatItem = ({ icon: Icon, value, label }) => {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-40px' });
+  const [display, setDisplay] = useState(0);
   const numValue = typeof value === 'string' ? parseFloat(value) : value;
-  const animatedValue = useCountUp(numValue, 2000, isVisible && !isNaN(numValue));
   const hasSuffix = typeof value === 'string' && value.includes('+');
+  const isDecimal = !isNaN(numValue) && !Number.isInteger(numValue);
+
+  useEffect(() => {
+    if (!inView || isNaN(numValue)) return;
+    const controls = animate(0, numValue, {
+      duration: 1.6,
+      ease: 'easeOut',
+      onUpdate: (v) => setDisplay(isDecimal ? v.toFixed(1) : Math.round(v)),
+    });
+    return () => controls.stop();
+  }, [inView, numValue, isDecimal]);
 
   return (
-    <div className="flex flex-col items-center gap-1 text-center">
+    <div ref={ref} className="flex flex-col items-center gap-1 text-center">
       <div className="w-12 h-12 mb-3 rounded-2xl bg-primary-50 dark:bg-primary-950/40 flex items-center justify-center">
         <Icon className="w-6 h-6 text-primary-500" />
       </div>
       <div className="text-3xl font-bold text-gray-900 dark:text-white tabular-nums">
-        {animatedValue}{hasSuffix ? '+' : ''}
+        {isNaN(numValue) ? '—' : <>{display}{hasSuffix ? '+' : ''}</>}
       </div>
       <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">{label}</div>
     </div>
@@ -30,19 +44,15 @@ const StatItem = ({ icon: Icon, value, label, isVisible }) => {
 };
 
 const Home = () => {
+  usePageMeta(
+    'StayNear — Find PG Accommodations in Mangalore',
+    'Find verified PG accommodations near your college in Mangalore. Search by college, area, budget and amenities — with real student reviews.'
+  );
   const [featuredPGs, setFeaturedPGs] = useState([]);
   const [stats, setStats] = useState(null);
   const [popularAreas, setPopularAreas] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const [heroRef, heroVisible] = useScrollAnimation();
-  const [statsRef, statsVisible] = useScrollAnimation();
-  const [featuredRef, featuredVisible] = useScrollAnimation();
-  const [areasRef, areasVisible] = useScrollAnimation();
-  const [featuresRef, featuresVisible] = useScrollAnimation();
-  const [testimonialsRef, testimonialsVisible] = useScrollAnimation();
-  const [ctaRef, ctaVisible] = useScrollAnimation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,7 +85,7 @@ const Home = () => {
     <div className="min-h-screen">
 
       {/* ── HERO ── */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center pt-16 overflow-hidden hero-mesh">
+      <section className="relative min-h-screen flex items-center pt-16 overflow-hidden hero-mesh">
         {/* Decorative blobs */}
         <div className="absolute top-1/3 left-0 w-[480px] h-[480px] bg-primary-700/15 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-1/4 right-0 w-[380px] h-[380px] bg-gold-500/10 rounded-full blur-[100px] pointer-events-none" />
@@ -103,23 +113,30 @@ const Home = () => {
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 w-full">
-          <div className="text-center max-w-4xl mx-auto">
+          <motion.div
+            className="text-center max-w-4xl mx-auto"
+            variants={heroContainer}
+            initial="initial"
+            animate="animate"
+          >
 
             {/* Status pill */}
-            <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 mb-8 border border-white/10 bg-white/5 backdrop-blur-sm">
+            <motion.div variants={heroItem} className="inline-flex items-center gap-2 rounded-full px-4 py-2 mb-8 border border-white/10 bg-white/5 backdrop-blur-sm">
               <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
               <span className="text-white/70 text-sm font-medium">Mangalore's #1 PG Finder</span>
-            </div>
+            </motion.div>
 
             {/* Logo mark */}
-            <img
+            <motion.img
+              variants={heroItem}
               src="/staynear-logo.png"
               alt="StayNear"
               className="w-16 h-16 mx-auto mb-6 logo-dark drop-shadow-xl"
             />
 
             {/* Headline */}
-            <h1
+            <motion.h1
+              variants={heroItem}
               className="font-display font-bold text-white leading-[1.05] tracking-tight mb-6"
               style={{ fontSize: 'clamp(2.6rem, 7.5vw, 5.5rem)' }}
             >
@@ -135,28 +152,30 @@ const Home = () => {
               >
                 PG in Mangalore
               </span>
-            </h1>
+            </motion.h1>
 
-            <p className="text-base md:text-lg text-white/50 mb-10 max-w-lg mx-auto leading-relaxed">
+            <motion.p variants={heroItem} className="text-base md:text-lg text-white/50 mb-10 max-w-lg mx-auto leading-relaxed">
               Discover comfortable, affordable, and secure accommodations near your college.
-            </p>
+            </motion.p>
 
             {/* Search */}
-            <div className="relative z-10 mb-6">
+            <motion.div variants={heroItem} className="relative z-10 mb-6">
               <SearchBar />
-            </div>
+            </motion.div>
 
             {/* Browse CTA */}
-            <Link
-              to="/pgs"
-              className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-500 text-white px-8 py-3.5 rounded-xl font-semibold transition-all duration-200 shadow-glow-primary mb-10"
-            >
-              Browse All PGs
-              <ArrowRight className="w-5 h-5" />
-            </Link>
+            <motion.div variants={heroItem}>
+              <Link
+                to="/pgs"
+                className="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-500 text-white px-8 py-3.5 rounded-xl font-semibold transition-all duration-200 shadow-glow-primary mb-10"
+              >
+                Browse All PGs
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </motion.div>
 
             {/* College quick links */}
-            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+            <motion.div variants={heroItem} className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
               <span className="text-white/25 text-sm">Near:</span>
               {colleges.slice(0, 4).map(college => (
                 <Link
@@ -167,37 +186,43 @@ const Home = () => {
                   {college}
                 </Link>
               ))}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
 
         {/* Fade to next section */}
-        <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#f0fdfa] dark:from-[#07070f] to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white dark:from-surface-section to-transparent pointer-events-none" />
       </section>
 
       {/* ── STATS ── */}
-      <section
-        ref={statsRef}
-        className="py-16 bg-white dark:bg-[#07070f] border-b border-gray-100 dark:border-white/[0.05] transition-all duration-700 ease-out"
-        style={{ opacity: statsVisible ? 1 : 0, transform: statsVisible ? 'translateY(0)' : 'translateY(20px)' }}
+      <motion.section
+        variants={fadeUp}
+        initial="initial"
+        whileInView="animate"
+        viewport={viewportOnce}
+        className="py-16 bg-white dark:bg-surface-section border-b border-gray-100 dark:border-white/[0.05]"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-            <StatItem icon={Building} value={stats?.totalPGs} label="Total PGs" isVisible={statsVisible} />
-            <StatItem icon={MapPin} value={stats?.totalAreas} label="Areas Covered" isVisible={statsVisible} />
-            <StatItem icon={Users} value={stats?.happyStudents} label="Happy Students" isVisible={statsVisible} />
-            <StatItem icon={Star} value={stats?.avgRating} label="Avg Rating" isVisible={statsVisible} />
+            <StatItem icon={Building} value={stats?.totalPGs} label="Total PGs" />
+            <StatItem icon={MapPin} value={stats?.totalAreas} label="Areas Covered" />
+            <StatItem icon={Users} value={stats?.happyStudents} label="Happy Students" />
+            <StatItem icon={Star} value={stats?.avgRating} label="Avg Rating" />
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ── FEATURED PGS ── */}
-      <section
-        ref={featuredRef}
-        className={`py-20 md:py-28 bg-gray-50 dark:bg-[#0b0b17] animate-on-scroll ${featuredVisible ? 'visible' : ''}`}
-      >
+      {(loading || featuredPGs.length > 0) && (
+      <section className="py-20 md:py-28 bg-gray-50 dark:bg-surface-raised">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12 gap-4">
+          <motion.div
+            variants={fadeUp}
+            initial="initial"
+            whileInView="animate"
+            viewport={viewportOnce}
+            className="flex flex-col md:flex-row md:items-end md:justify-between mb-12 gap-4"
+          >
             <div>
               <p className="section-label mb-2">Hand-picked for you</p>
               <h2 className="section-title">Featured PGs</h2>
@@ -208,24 +233,39 @@ const Home = () => {
             >
               View all listings <ArrowRight className="w-4 h-4" />
             </Link>
-          </div>
+          </motion.div>
 
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => <LoadingSkeleton key={i} />)}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredPGs.map(pg => <PGCard key={pg._id} pg={pg} />)}
-            </div>
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              whileInView="animate"
+              viewport={viewportOnce}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {featuredPGs.map(pg => (
+                <motion.div key={pg._id} variants={staggerItem}>
+                  <PGCard pg={pg} />
+                </motion.div>
+              ))}
+            </motion.div>
           )}
         </div>
       </section>
+      )}
 
       {/* ── POPULAR AREAS ── */}
-      <section
-        ref={areasRef}
-        className={`py-20 md:py-28 bg-white dark:bg-[#07070f] animate-on-scroll ${areasVisible ? 'visible' : ''}`}
+      {popularAreas.length > 0 && (
+      <motion.section
+        variants={fadeUp}
+        initial="initial"
+        whileInView="animate"
+        viewport={viewportOnce}
+        className="py-20 md:py-28 bg-white dark:bg-surface-section"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -262,12 +302,16 @@ const Home = () => {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
+      )}
 
       {/* ── WHY STAYNEAR ── */}
-      <section
-        ref={featuresRef}
-        className={`py-20 md:py-28 bg-gray-50 dark:bg-[#0b0b17] animate-on-scroll ${featuresVisible ? 'visible' : ''}`}
+      <motion.section
+        variants={fadeUp}
+        initial="initial"
+        whileInView="animate"
+        viewport={viewportOnce}
+        className="py-20 md:py-28 bg-gray-50 dark:bg-surface-raised"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -322,12 +366,16 @@ const Home = () => {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* ── TESTIMONIALS ── */}
-      <section
-        ref={testimonialsRef}
-        className={`py-20 md:py-28 bg-white dark:bg-[#07070f] animate-on-scroll ${testimonialsVisible ? 'visible' : ''}`}
+      {testimonials.length > 0 && (
+      <motion.section
+        variants={fadeUp}
+        initial="initial"
+        whileInView="animate"
+        viewport={viewportOnce}
+        className="py-20 md:py-28 bg-white dark:bg-surface-section"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -371,12 +419,16 @@ const Home = () => {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
+      )}
 
       {/* ── CTA ── */}
-      <section
-        ref={ctaRef}
-        className={`py-20 bg-gray-50 dark:bg-[#0b0b17] animate-on-scroll ${ctaVisible ? 'visible' : ''}`}
+      <motion.section
+        variants={fadeUp}
+        initial="initial"
+        whileInView="animate"
+        viewport={viewportOnce}
+        className="py-20 bg-gray-50 dark:bg-surface-raised"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
@@ -434,7 +486,7 @@ const Home = () => {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 };

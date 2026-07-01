@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Home, Search } from 'lucide-react';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const NotFound = () => {
+  usePageMeta('Page Not Found | StayNear');
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
       <div className="max-w-md w-full text-center">

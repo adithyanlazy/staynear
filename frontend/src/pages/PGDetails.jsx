@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Star, Heart, Phone, Utensils, Snowflake, Users, ArrowLeft, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MapPin, Star, Heart, Phone, Utensils, Snowflake, Users, ArrowLeft, ChevronLeft, ChevronRight, X, MessageCircle, Share2 } from 'lucide-react';
+import { distanceToCollege } from '../utils/distance';
+import { usePageMeta } from '../hooks/usePageMeta';
 import { useAuth } from '../context/AuthContext';
 import PGCard from '../components/PGCard';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
+import { isPGFavorite } from '../utils/favorites';
 
 const PGDetails = () => {
   const { id } = useParams();
@@ -19,6 +23,11 @@ const PGDetails = () => {
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  usePageMeta(
+    pg ? `${pg.name} — ${pg.area}, Mangalore | StayNear` : undefined,
+    pg ? `${pg.name}: ₹${pg.rent?.toLocaleString()}/mo ${pg.gender} PG in ${pg.area}, Mangalore. ${(pg.description || '').slice(0, 120)}` : undefined
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,7 +50,7 @@ const PGDetails = () => {
     fetchData();
   }, [id]);
 
-  const isFavorite = user?.favorites?.some(fav => (typeof fav === 'object' ? fav.pgId : fav) === id);
+  const isFavorite = isPGFavorite(user, id);
 
   const handleFavorite = async () => {
     if (!user) {
@@ -130,6 +139,34 @@ const PGDetails = () => {
     );
   }
 
+  const handleShare = async () => {
+    const shareData = {
+      title: `${pg.name} — StayNear`,
+      text: `${pg.name} in ${pg.area}, Mangalore — ₹${pg.rent?.toLocaleString()}/mo on StayNear`,
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard');
+      }
+    } catch (err) {
+      // user cancelled the share sheet — not an error
+    }
+  };
+
+  // wa.me needs digits only with country code; assume India for 10-digit numbers
+  const waNumber = (() => {
+    const digits = (pg.contactNumber || '').replace(/\D/g, '');
+    if (!digits) return null;
+    return digits.length === 10 ? `91${digits}` : digits;
+  })();
+  const waLink = waNumber
+    ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hi, I found "${pg.name}" on StayNear and I'm interested. Is it available?`)}`
+    : null;
+
   const defaultImages = [
     'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800',
     'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800',
@@ -138,7 +175,7 @@ const PGDetails = () => {
   const images = pg.images?.length > 0 ? pg.images : defaultImages;
 
   return (
-    <div className="min-h-screen pt-20 pb-16">
+    <div className="min-h-screen pt-20 pb-28 lg:pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Link to="/pgs" className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary-500 mb-6">
           <ArrowLeft className="w-5 h-5" />
@@ -216,16 +253,26 @@ const PGDetails = () => {
                     </span>
                   </div>
                 </div>
-                <button
-                  onClick={handleFavorite}
-                  className={`p-3 rounded-xl transition-all ${
-                    isFavorite
-                      ? 'bg-red-500 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 hover:bg-red-50 hover:text-red-500'
-                  }`}
-                >
-                  <Heart className={`w-6 h-6 ${isFavorite ? 'fill-current' : ''}`} />
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleShare}
+                    aria-label="Share this PG"
+                    className="p-3 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-primary-50 hover:text-primary-500 dark:hover:bg-primary-900/20 transition-all"
+                  >
+                    <Share2 className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={handleFavorite}
+                    aria-label={isFavorite ? 'Remove from favorites' : 'Save to favorites'}
+                    className={`p-3 rounded-xl transition-all ${
+                      isFavorite
+                        ? 'bg-red-500 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-red-50 hover:text-red-500'
+                    }`}
+                  >
+                    <Heart className={`w-6 h-6 ${isFavorite ? 'fill-current' : ''}`} />
+                  </button>
+                </div>
               </div>
 
               <p className="text-gray-600 dark:text-gray-400 mb-6">{pg.description}</p>
@@ -269,14 +316,18 @@ const PGDetails = () => {
             <div className="card p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-lg">Reviews ({reviews.length})</h3>
-                {user && (
-                  <button
-                    onClick={() => setShowReviewForm(!showReviewForm)}
-                    className="btn-primary text-sm py-2"
-                  >
-                    Add Review
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    if (!user) {
+                      toast.error('Please login to add a review');
+                      return;
+                    }
+                    setShowReviewForm(!showReviewForm);
+                  }}
+                  className="btn-primary text-sm py-2"
+                >
+                  Add Review
+                </button>
               </div>
 
               {showReviewForm && (
@@ -365,6 +416,14 @@ const PGDetails = () => {
                 <div className="text-center mb-6">
                   <div className="text-4xl font-bold text-primary-500 mb-1">₹{pg.rent?.toLocaleString()}</div>
                   <div className="text-gray-500">per month</div>
+                  <span className={`inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-xs font-semibold ${
+                    pg.available === false
+                      ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${pg.available === false ? 'bg-red-500' : 'bg-emerald-500'}`} />
+                    {pg.available === false ? 'Currently Full' : 'Rooms Available'}
+                  </span>
                 </div>
                 <div className="text-center mb-6">
                   <span className="text-sm text-gray-500">Security Deposit: </span>
@@ -378,6 +437,18 @@ const PGDetails = () => {
                   <Phone className="w-5 h-5" />
                   Call Now
                 </a>
+
+                {waLink && (
+                  <a
+                    href={waLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold bg-[#25D366] hover:bg-[#1fb857] text-white transition-colors mb-3"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    WhatsApp
+                  </a>
+                )}
 
                 <button
                   onClick={handleFavorite}
@@ -428,15 +499,19 @@ const PGDetails = () => {
               <div className="card p-6">
                 <h3 className="font-semibold text-lg mb-4">Nearby Colleges</h3>
                 <div className="space-y-2">
-                  {pg.collegeNearby?.map((college, i) => (
-                    <Link
-                      key={i}
-                      to={`/pgs?collegeNearby=${college}`}
-                      className="block p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
-                    >
-                      {college}
-                    </Link>
-                  ))}
+                  {pg.collegeNearby?.map((college, i) => {
+                    const dist = distanceToCollege(pg, college);
+                    return (
+                      <Link
+                        key={i}
+                        to={`/pgs?collegeNearby=${college}`}
+                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+                      >
+                        <span>{college}</span>
+                        {dist && <span className="text-xs font-medium text-primary-500">{dist}</span>}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -455,9 +530,42 @@ const PGDetails = () => {
         )}
       </div>
 
+      {/* Sticky contact bar — mobile only, sidebar card covers desktop */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-surface-card/95 backdrop-blur-md border-t border-gray-200 dark:border-white/10 px-4 py-3 flex items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
+            ₹{pg.rent?.toLocaleString()}<span className="text-xs font-normal text-gray-400">/mo</span>
+          </div>
+          <div className="text-xs text-gray-500 truncate">{pg.area}</div>
+        </div>
+        {waLink && (
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Chat on WhatsApp"
+            className="p-3 rounded-xl bg-[#25D366] text-white"
+          >
+            <MessageCircle className="w-5 h-5" />
+          </a>
+        )}
+        <a
+          href={`tel:${pg.contactNumber}`}
+          className="btn-primary flex items-center gap-2 py-3 px-5 text-sm"
+        >
+          <Phone className="w-4 h-4" />
+          Call
+        </a>
+      </div>
+
       {/* Lightbox Modal */}
+      <AnimatePresence>
       {lightboxOpen && (
-        <div
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"
           onClick={closeLightbox}
         >
@@ -479,10 +587,20 @@ const PGDetails = () => {
             className="max-w-[90vw] max-h-[90vh] flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <img
+            <motion.img
+              key={lightboxIndex}
               src={images[lightboxIndex]}
               alt={pg.name}
-              className="max-w-full max-h-[90vh] object-contain"
+              initial={{ opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={0.7}
+              onDragEnd={(e, info) => {
+                if (Math.abs(info.offset.y) > 120) closeLightbox();
+              }}
+              className="max-w-full max-h-[90vh] object-contain cursor-grab active:cursor-grabbing"
             />
           </div>
 
@@ -498,8 +616,9 @@ const PGDetails = () => {
               {lightboxIndex + 1} / {images.length}
             </span>
           </div>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 };

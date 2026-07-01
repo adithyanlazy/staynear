@@ -5,8 +5,10 @@ import { useAuth } from '../context/AuthContext';
 import PGCard from '../components/PGCard';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import api from '../utils/api';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const Favorites = () => {
+  usePageMeta('My Favorites | StayNear');
   const { user } = useAuth();
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);

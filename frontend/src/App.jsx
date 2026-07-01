@@ -1,10 +1,11 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { MotionConfig, AnimatePresence, motion } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
+import { pageTransition } from './utils/motion';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import AuthGate from './components/AuthGate';
 import PrivateRoute from './components/PrivateRoute';
 import AdminLayout from './components/admin/AdminLayout';
 
@@ -36,14 +37,11 @@ const ScrollToTop = () => {
 };
 
 const AppContent = () => {
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return <PageLoader />;
-  }
-
-  if (!user) {
-    return <AuthGate />;
   }
 
   return (
@@ -51,21 +49,31 @@ const AppContent = () => {
       <Navbar />
       <main className="flex-1">
         <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/pgs" element={<PGListings />} />
-            <Route path="/pg/:id" element={<PGDetails />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route
-              path="/favorites"
-              element={
-                <PrivateRoute>
-                  <Favorites />
-                </PrivateRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              variants={pageTransition}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <Routes location={location}>
+                <Route path="/" element={<Home />} />
+                <Route path="/pgs" element={<PGListings />} />
+                <Route path="/pg/:id" element={<PGDetails />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route
+                  path="/favorites"
+                  element={
+                    <PrivateRoute>
+                      <Favorites />
+                    </PrivateRoute>
+                  }
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </motion.div>
+          </AnimatePresence>
         </Suspense>
       </main>
       <Footer />
@@ -76,6 +84,7 @@ const AppContent = () => {
 function App() {
   return (
     <AuthProvider>
+      <MotionConfig reducedMotion="user">
       <Router>
         <ScrollToTop />
         <Routes>
@@ -112,6 +121,7 @@ function App() {
           }}
         />
       </Router>
+      </MotionConfig>
     </AuthProvider>
   );
 }

@@ -41,7 +41,7 @@ const PGManagement = () => {
     foodIncluded: false, acAvailable: false, sharingType: 'double',
     area: 'Surathkal', collegeNearby: [], address: '',
     images: [], videos: [], amenities: [], contactNumber: '',
-    contactName: '', featured: false,
+    contactName: '', featured: false, available: true, lat: '', lng: '',
   });
 
   useEffect(() => { fetchPGs(); }, []);
@@ -74,6 +74,8 @@ const PGManagement = () => {
         address: pg.address,
         images: pg.images || [], videos: pg.videos || [], amenities: pg.amenities || [],
         contactNumber: pg.contactNumber, contactName: pg.contactName || '', featured: pg.featured,
+        available: pg.available !== false,
+        lat: pg.location?.lat ?? '', lng: pg.location?.lng ?? '',
       });
     } else {
       setEditingPG(null);
@@ -82,7 +84,7 @@ const PGManagement = () => {
         foodIncluded: false, acAvailable: false, sharingType: 'double',
         area: 'Surathkal', collegeNearby: [], address: '',
         images: [], videos: [], amenities: [], contactNumber: '',
-        contactName: '', featured: false,
+        contactName: '', featured: false, available: true, lat: '', lng: '',
       });
     }
     setShowModal(true);
@@ -91,11 +93,18 @@ const PGManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const { lat, lng, ...rest } = formData;
+      const payload = {
+        ...rest,
+        location: lat !== '' && lng !== ''
+          ? { lat: parseFloat(lat), lng: parseFloat(lng) }
+          : null,
+      };
       if (editingPG) {
-        await api.put(`/pgs/${editingPG._id}`, formData);
+        await api.put(`/pgs/${editingPG._id}`, payload);
         toast.success('PG updated successfully');
       } else {
-        await api.post('/pgs', formData);
+        await api.post('/pgs', payload);
         toast.success('PG created successfully');
       }
       setShowModal(false);
@@ -671,6 +680,14 @@ const PGManagement = () => {
                   <label className="block text-sm font-medium mb-1">Address</label>
                   <input type="text" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} className="input-field" required />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Latitude <span className="text-gray-400 font-normal">(optional — enables distance badges)</span></label>
+                  <input type="number" step="any" value={formData.lat} onChange={(e) => setFormData({ ...formData, lat: e.target.value })} className="input-field" placeholder="12.8703" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Longitude</label>
+                  <input type="number" step="any" value={formData.lng} onChange={(e) => setFormData({ ...formData, lng: e.target.value })} className="input-field" placeholder="74.8425" />
+                </div>
               </div>
 
               <div className="flex flex-wrap gap-4">
@@ -678,6 +695,7 @@ const PGManagement = () => {
                   { key: 'foodIncluded', label: 'Food Included' },
                   { key: 'acAvailable', label: 'AC Available' },
                   { key: 'featured', label: 'Featured' },
+                  { key: 'available', label: 'Rooms Available' },
                 ].map(({ key, label }) => (
                   <label key={key} className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={formData[key]} onChange={(e) => setFormData({ ...formData, [key]: e.target.checked })} className="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500" />

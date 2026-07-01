@@ -1,18 +1,40 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Phone, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, KeyRound, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const ForgotPassword = () => {
-  const [phone, setPhone] = useState('');
+  usePageMeta('Reset Password | StayNear');
+  const [step, setStep] = useState(1); // 1 = request code, 2 = verify + reset
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleRequestCode = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await api.post('/auth/forgot-password', { email });
+      toast.success('If an account exists, a reset code was sent to your email');
+      setStep(2);
+    } catch (err) {
+      if (err.response?.status === 429) {
+        toast.error('Too many attempts. Please wait a few minutes.');
+      } else {
+        toast.error(err.response?.data?.message || 'Failed to send reset code');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       toast.error('Passwords do not match');
@@ -20,7 +42,7 @@ const ForgotPassword = () => {
     }
     setLoading(true);
     try {
-      await api.post('/auth/forgot-password', { phone, newPassword });
+      await api.post('/auth/reset-password', { email, otp, newPassword });
       toast.success('Password reset successful!');
       navigate('/login');
     } catch (err) {
@@ -42,73 +64,110 @@ const ForgotPassword = () => {
             <img src="/staynear-logo.png" alt="StayNear" className="w-12 h-12 logo-dark" />
           </Link>
           <h1 className="text-3xl font-display font-bold">Reset Password</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">Enter your phone number and new password</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            {step === 1
+              ? "Enter your email and we'll send you a reset code"
+              : `Enter the code sent to ${email}`}
+          </p>
         </div>
 
         <div className="card p-8">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Phone Number</label>
-              <div className="relative flex">
-                <span className="flex items-center px-3 bg-gray-100 dark:bg-gray-700 border border-r-0 border-gray-300 dark:border-gray-600 rounded-l-lg text-sm font-medium text-gray-700 dark:text-gray-300">
-                  +91
-                </span>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  className="input-field rounded-l-none flex-1"
-                  placeholder="98765 43210"
-                  maxLength={10}
-                  required
-                />
+          {step === 1 ? (
+            <form onSubmit={handleRequestCode} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="input-field pl-10"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </div>
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">New Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="input-field pl-10 pr-10"
-                  placeholder="Min 8 characters with a number"
-                  minLength={8}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Sending...' : 'Send Reset Code'}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleReset} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Reset Code</label>
+                <div className="relative">
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    className="input-field pl-10 tracking-[0.3em] font-semibold"
+                    placeholder="6-digit code"
+                    maxLength={6}
+                    required
+                  />
+                </div>
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Confirm Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="input-field pl-10 pr-10"
-                  placeholder="Re-enter new password"
-                  minLength={8}
-                  required
-                />
+              <div>
+                <label className="block text-sm font-medium mb-2">New Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="input-field pl-10 pr-10"
+                    placeholder="Min 8 characters with a number"
+                    minLength={8}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Resetting...' : 'Reset Password'}
-            </button>
-          </form>
+              <div>
+                <label className="block text-sm font-medium mb-2">Confirm Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="input-field pl-10 pr-10"
+                    placeholder="Re-enter new password"
+                    minLength={8}
+                    required
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Resetting...' : 'Reset Password'}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setStep(1); setOtp(''); }}
+                className="w-full flex items-center justify-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-primary-500 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Use a different email
+              </button>
+            </form>
+          )}
 
           <div className="mt-6 text-center">
             <p className="text-gray-600 dark:text-gray-400">

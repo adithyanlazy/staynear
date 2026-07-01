@@ -1,16 +1,17 @@
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { MapPin, Star, Heart, Utensils, Snowflake, Users, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { isPGFavorite } from '../utils/favorites';
+import { spring } from '../utils/motion';
+import { nearestCollege } from '../utils/distance';
+
+const MotionLink = motion.create(Link);
 
 const PGCard = ({ pg, onRemoveFavorite }) => {
   const { user, addFavorite, removeFavorite } = useAuth();
-  const isFavorite = user?.favorites?.some(fav => {
-    if (typeof fav === 'object') {
-      return (fav.pgId?._id || fav.pgId || fav._id) === pg._id;
-    }
-    return fav === pg._id;
-  });
+  const isFavorite = isPGFavorite(user, pg._id);
 
   const handleFavorite = async (e) => {
     e.preventDefault();
@@ -33,6 +34,8 @@ const PGCard = ({ pg, onRemoveFavorite }) => {
     }
   };
 
+  const near = nearestCollege(pg);
+
   const genderColor = {
     boys: 'bg-blue-500/85',
     girls: 'bg-pink-500/85',
@@ -46,13 +49,20 @@ const PGCard = ({ pg, onRemoveFavorite }) => {
   }[pg.gender] || pg.gender;
 
   return (
-    <Link to={`/pg/${pg._id}`} className="card-hover group block">
+    <MotionLink
+      to={`/pg/${pg._id}`}
+      className="card group block"
+      whileHover={{ y: -6 }}
+      whileTap={{ scale: 0.98 }}
+      transition={spring}
+    >
       {/* Image */}
-      <div className="relative overflow-hidden bg-black">
+      <div className="relative overflow-hidden aspect-[4/3]">
         <img
           src={pg.images?.[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800'}
           alt={pg.name}
-          className="w-full max-h-64 md:max-h-56 object-contain group-hover:scale-105 transition-transform duration-700"
+          loading="lazy"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
         />
 
         {/* Gradient overlay */}
@@ -60,6 +70,11 @@ const PGCard = ({ pg, onRemoveFavorite }) => {
 
         {/* Top-left badges */}
         <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
+          {pg.available === false && (
+            <span className="bg-red-600 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
+              Full
+            </span>
+          )}
           {pg.featured && (
             <span className="bg-gold-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
               ✦ Featured
@@ -93,17 +108,20 @@ const PGCard = ({ pg, onRemoveFavorite }) => {
         </div>
 
         {/* Favorite button */}
-        <button
+        <motion.button
           onClick={handleFavorite}
           aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-          className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 shadow-md ${
+          whileTap={{ scale: 0.85 }}
+          animate={isFavorite ? { scale: [1, 1.3, 1] } : { scale: 1 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center transition-colors duration-200 shadow-md ${
             isFavorite
               ? 'bg-red-500 text-white'
               : 'bg-white/90 backdrop-blur-sm text-gray-500 hover:text-red-500 hover:bg-white'
           }`}
         >
           <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
-        </button>
+        </motion.button>
       </div>
 
       {/* Content */}
@@ -116,6 +134,12 @@ const PGCard = ({ pg, onRemoveFavorite }) => {
           <MapPin className="w-3.5 h-3.5 mr-1 flex-shrink-0 text-gray-300 dark:text-gray-600" />
           <span className="line-clamp-1">{pg.area}, Mangalore</span>
         </div>
+
+        {near && (
+          <div className="text-xs font-medium text-primary-500 dark:text-primary-400 mb-3 -mt-1.5">
+            {near.label}
+          </div>
+        )}
 
         <div className="flex items-center gap-3 text-xs text-gray-400 mb-4">
           <span className="flex items-center gap-1">
@@ -141,7 +165,7 @@ const PGCard = ({ pg, onRemoveFavorite }) => {
           </div>
         </div>
       </div>
-    </Link>
+    </MotionLink>
   );
 };
 

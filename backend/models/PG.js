@@ -76,6 +76,14 @@ const PGSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  location: {
+    lat: { type: Number },
+    lng: { type: Number }
+  },
+  available: {
+    type: Boolean,
+    default: true
+  },
   featured: {
     type: Boolean,
     default: false
